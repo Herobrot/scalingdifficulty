@@ -2,11 +2,16 @@
   "required": true,
   "package": "com.herobrot.scalingdifficulty.mixin",
   "compatibilityLevel": "JAVA_21",
-  "mixins": [],
+  "mixins": [
+    "WolfEntityMixin"
+  ],
   "injectors": {
     "defaultRequire": 1
   },
   "overwrites": {
     "requireAnnotations": true
-  }
+  },
+  "client": [
+    "client.ZombieRendererMixin"
+  ]
 }
