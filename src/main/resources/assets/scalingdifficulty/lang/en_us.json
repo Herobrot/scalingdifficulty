@@ -1,0 +1,13 @@
+{
+  "itemGroup.scalingdifficulty": "Example Mod Tab",
+  "block.scalingdifficulty.example_block": "Example Block",
+  "item.scalingdifficulty.example_item": "Example Item",
+
+  "scalingdifficulty.configuration.title": "ScalingDifficulty Configs",
+  "scalingdifficulty.configuration.section.scalingdifficulty.common.toml": "ScalingDifficulty Configs",
+  "scalingdifficulty.configuration.section.scalingdifficulty.common.toml.title": "ScalingDifficulty Configs",
+  "scalingdifficulty.configuration.items": "Item List",
+  "scalingdifficulty.configuration.logDirtBlock": "Log Dirt Block",
+  "scalingdifficulty.configuration.magicNumberIntroduction": "Magic Number Text",
+  "scalingdifficulty.configuration.magicNumber": "Magic Number"
+}
