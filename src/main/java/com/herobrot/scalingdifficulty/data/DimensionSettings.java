@@ -21,8 +21,8 @@ public class DimensionSettings {
     public final int startingDistance;
     public final int startingTime;
     public final int startingHeight;
-    public final boolean positiveHeightIncreasion;
-    public final boolean negativeHeightIncreasion;
+    public final boolean positiveHeightIncrement;
+    public final boolean negativeHeightIncrement;
 
     public DimensionSettings(JsonObject data) {
         ScalingDifficultyConfig c = ScalingDifficulty.CONFIG;
@@ -51,7 +51,7 @@ public class DimensionSettings {
         this.startingTime = data.has("startingTime") ? data.get("startingTime").getAsInt() : c.startingTime;
         this.startingHeight = data.has("startingHeight") ? data.get("startingHeight").getAsInt() : c.startingHeight;
 
-        this.positiveHeightIncreasion = data.has("positiveHeightIncreasion") ? data.get("positiveHeightIncreasion").getAsBoolean() : c.positiveHeightIncreasion;
-        this.negativeHeightIncreasion = data.has("negativeHeightIncreasion") ? data.get("negativeHeightIncreasion").getAsBoolean() : c.negativeHeightIncreasion;
+        this.positiveHeightIncrement = data.has("positiveHeightIncrement") ? data.get("positiveHeightIncrement").getAsBoolean() : c.positiveHeightIncrement;
+        this.negativeHeightIncrement = data.has("negativeHeightIncrement") ? data.get("negativeHeightIncrement").getAsBoolean() : c.negativeHeightIncrement;
     }
 }

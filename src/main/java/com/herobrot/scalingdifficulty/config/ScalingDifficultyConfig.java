@@ -25,12 +25,14 @@ public class ScalingDifficultyConfig implements ConfigData {
     public int heightDistance = 30;
     @ConfigEntry.Gui.Tooltip
     public double heightFactor = 0.1D;
+    //FALTA TESTEAR
+    // FALTA VERIFICAR AUMENTOS CORRECTOS
+    // FALTA AGREGAR LENGUAJE
 
     @ConfigEntry.Gui.Tooltip
     public double maxFactorHealth = 3.0D;
     public double maxFactorDamage = 3.0D;
     public double maxFactorProtection = 1.5D;
-    @ConfigEntry.Gui.Tooltip
     public double maxFactorSpeed = 2.0D;
 
     public boolean allowRandomValues = false;
@@ -53,8 +55,8 @@ public class ScalingDifficultyConfig implements ConfigData {
     @ConfigEntry.Gui.Tooltip
     public int startingHeight = 62;
 
-    public boolean positiveHeightIncreasion = true;
-    public boolean negativeHeightIncreasion = true;
+    public boolean positiveHeightIncrement = true;
+    public boolean negativeHeightIncrement = true;
 
     public boolean affectBosses = true;
     @ConfigEntry.Gui.Tooltip

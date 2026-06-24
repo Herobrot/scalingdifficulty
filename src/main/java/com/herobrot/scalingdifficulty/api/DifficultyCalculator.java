@@ -3,10 +3,11 @@ package com.herobrot.scalingdifficulty.api;
 import com.herobrot.scalingdifficulty.util.EntityTags;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.tags.EntityTypeTags;
+
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.monster.Zombie;
 import net.minecraft.world.level.Level;
 import com.herobrot.scalingdifficulty.ScalingDifficulty;
 import com.herobrot.scalingdifficulty.config.ScalingDifficultyConfig;
@@ -76,8 +77,8 @@ public class DifficultyCalculator {
         if (!isBoss && settings.heightDistance != 0) {
             int spawnHeightDivided = (mobSpawnHeight - settings.startingHeight) / settings.heightDistance;
 
-            if (!settings.positiveHeightIncreasion && spawnHeightDivided > 0) spawnHeightDivided = 0;
-            if (!settings.negativeHeightIncreasion && spawnHeightDivided < 0) spawnHeightDivided = 0;
+            if (!settings.positiveHeightIncrement && spawnHeightDivided > 0) spawnHeightDivided = 0;
+            if (!settings.negativeHeightIncrement && spawnHeightDivided < 0) spawnHeightDivided = 0;
             if (config.excludeHeightInOtherDimension && level.dimension() != Level.OVERWORLD) spawnHeightDivided = 0;
 
             spawnHeightDivided = Math.abs(spawnHeightDivided);
@@ -102,7 +103,7 @@ public class DifficultyCalculator {
         }
 
         // 5.5 Manejo de Big Zombie / Speed Zombie
-        if (config.allowSpecialZombie && !mob.isBaby() && mob instanceof net.minecraft.world.entity.monster.Zombie) {
+        if (config.allowSpecialZombie && !mob.isBaby() && mob instanceof Zombie) {
             if (level.random.nextFloat() < (config.speedZombieChance / 100f)) {
                 // Zombie Veloz: Pierde vida, gana velocidad
                 mobHealthFactor -= (config.speedZombieMalusLifePoints / mob.getAttributeBaseValue(Attributes.MAX_HEALTH));
