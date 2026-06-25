@@ -39,7 +39,6 @@ public class EntityEvents {
     @SubscribeEvent
     public static void onLivingExperienceDrop(LivingExperienceDropEvent event) {
         if (!ScalingDifficulty.CONFIG.extraXp) return;
-
         if (event.getEntity() instanceof Mob mob) {
             float multiplier = mob.getData(ModAttachments.DIFFICULTY_MULTIPLIER);
             if (multiplier > 1.0f) {
@@ -53,7 +52,6 @@ public class EntityEvents {
     @SuppressWarnings("resource")
     public static void onLivingDrops(LivingDropsEvent event) {
         if (!ScalingDifficulty.CONFIG.dropMoreLoot) return;
-
         if (event.getEntity() instanceof Mob mob) {
             float multiplier = mob.getData(ModAttachments.DIFFICULTY_MULTIPLIER);
             if (multiplier > 0.01f) {
@@ -62,7 +60,6 @@ public class EntityEvents {
 
                 if (mob.level().random.nextFloat() <= dropChance) {
                     for (ItemEntity drop : event.getDrops()) {
-                        // Replicamos la lógica original: Ignorar ciertos ítems por probabilidad
                         if (mob.level().random.nextFloat() >= ScalingDifficulty.CONFIG.chanceForEachItem) {
                             ItemStack stack = drop.getItem();
                             int bonus = (int) (stack.getCount() * dropChance);
@@ -87,8 +84,6 @@ public class EntityEvents {
         Entity directEntity = source.getDirectEntity();
 
         if (attacker instanceof Mob mob) {
-            // Verificamos si el daño NO es cuerpo a cuerpo (proyectiles, magia, explosiones)
-            // o si proviene de mobs con ataques especiales como el Guardián o el Dragón.
             boolean isIndirectOrSpecial = directEntity != mob ||
                     source.is(DamageTypeTags.IS_PROJECTILE) ||
                     source.is(DamageTypeTags.IS_EXPLOSION) ||
@@ -98,7 +93,6 @@ public class EntityEvents {
             if (isIndirectOrSpecial) {
                 float damageFactor = mob.getData(ModAttachments.DIFFICULTY_MULTIPLIER);
 
-                // Aplicar el factor especial para explosiones de Creeper
                 if (mob instanceof Creeper) {
                     damageFactor *= (float) ScalingDifficulty.CONFIG.creeperExplosionFactor;
                 }

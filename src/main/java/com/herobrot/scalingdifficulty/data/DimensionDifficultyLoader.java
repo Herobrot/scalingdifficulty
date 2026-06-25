@@ -18,18 +18,16 @@ public class DimensionDifficultyLoader extends SimpleJsonResourceReloadListener 
     private static final Gson GSON = new GsonBuilder().create();
     private static final Map<String, DimensionSettings> DIMENSIONS = new HashMap<>();
 
-    // Objeto de respaldo pre-calculado para cuando una dimensión no tiene JSON propio
     private static DimensionSettings FALLBACK_SETTINGS;
 
     public DimensionDifficultyLoader() {
-        // Apunta al directorio data/*/difficulty/
         super(GSON, "difficulty");
     }
 
     @Override
     protected void apply(Map<ResourceLocation, JsonElement> jsonMap, @NotNull ResourceManager resourceManager, @NotNull ProfilerFiller profiler) {
         DIMENSIONS.clear();
-        FALLBACK_SETTINGS = new DimensionSettings(new JsonObject()); // Inicializa solo con defaults
+        FALLBACK_SETTINGS = new DimensionSettings(new JsonObject()); 
 
         jsonMap.forEach((location, element) -> {
             try {
@@ -46,7 +44,6 @@ public class DimensionDifficultyLoader extends SimpleJsonResourceReloadListener 
     }
 
     public static DimensionSettings getSettings(String dimensionId) {
-        // Retorna las reglas de la dimensión si existen, si no, retorna el fallback de Cloth Config
         if (FALLBACK_SETTINGS == null) {
             FALLBACK_SETTINGS = new DimensionSettings(new JsonObject());
         }

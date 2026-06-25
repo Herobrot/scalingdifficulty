@@ -10,8 +10,7 @@ import java.util.function.Supplier;
 
 public class ModAttachments {
     public static final DeferredRegister<AttachmentType<?>> ATTACHMENT_TYPES = DeferredRegister.create(NeoForgeRegistries.Keys.ATTACHMENT_TYPES, ScalingDifficulty.MOD_ID);
-
-    // Bandera para evitar bucle de escalado
+    
     public static final Supplier<AttachmentType<Boolean>> PROCESSED = ATTACHMENT_TYPES.register(
             "processed",
             () -> AttachmentType.builder(() -> false)
@@ -19,7 +18,6 @@ public class ModAttachments {
                     .build()
     );
 
-    // Guarda el factor final de salud para usarlo luego en XP, Loot y Daño de proyectiles
     public static final Supplier<AttachmentType<Float>> DIFFICULTY_MULTIPLIER = ATTACHMENT_TYPES.register(
             "difficulty_multiplier",
             () -> AttachmentType.builder(() -> 1.0f)

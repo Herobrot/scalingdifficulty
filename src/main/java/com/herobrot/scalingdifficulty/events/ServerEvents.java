@@ -8,10 +8,8 @@ import net.neoforged.neoforge.event.AddReloadListenerEvent;
 
 @EventBusSubscriber(modid = ScalingDifficulty.MOD_ID)
 public class ServerEvents {
-
     @SubscribeEvent
     public static void onAddReloadListeners(AddReloadListenerEvent event) {
-        // Añade el loader de JSON a la cadena de carga del servidor
         event.addListener(new DimensionDifficultyLoader());
     }
 }

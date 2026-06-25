@@ -27,11 +27,8 @@ public class DimensionSettings {
     public DimensionSettings(JsonObject data) {
         ScalingDifficultyConfig c = ScalingDifficulty.CONFIG;
 
-        // Coordenadas fijas (pueden ser nulas si no se definen, para usar el spawn mundial)
         this.distanceCoordinatesX = data.has("distanceCoordinatesX") ? data.get("distanceCoordinatesX").getAsInt() : null;
         this.distanceCoordinatesZ = data.has("distanceCoordinatesZ") ? data.get("distanceCoordinatesZ").getAsInt() : null;
-
-        // Factores con herencia por defecto de la config global
         this.increasingDistance = data.has("increasingDistance") ? data.get("increasingDistance").getAsInt() : c.increasingDistance;
         this.distanceFactor = data.has("distanceFactor") ? data.get("distanceFactor").getAsDouble() : c.distanceFactor;
 

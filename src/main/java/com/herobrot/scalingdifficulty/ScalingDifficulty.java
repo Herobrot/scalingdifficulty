@@ -15,16 +15,13 @@ public class ScalingDifficulty {
     public static final String MOD_ID = "scalingdifficulty";
     public static final Logger LOGGER = LogManager.getLogger();
 
-    // Puntero para mantener compatibilidad con las llamadas en la API
     public static ScalingDifficultyConfig CONFIG;
 
     public ScalingDifficulty(IEventBus modEventBus, ModContainer modContainer) {
-        // 1. Inicializar Configuración y Datos
         ConfigInit.init();
         CONFIG = ConfigInit.CONFIG;
         ModAttachments.ATTACHMENT_TYPES.register(modEventBus);
 
-        // 2. Registrar interfaz gráfica (Solo Cliente)
         if (FMLEnvironment.dist.isClient()) {
             com.herobrot.scalingdifficulty.events.ClientEvents.registerConfigScreen(modContainer);
         }

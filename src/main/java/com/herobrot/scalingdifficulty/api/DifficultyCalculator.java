@@ -26,8 +26,7 @@ public class DifficultyCalculator {
         boolean isBoss = mob.getType().is(EntityTags.BOSSES);
         if (isBoss && !config.affectBosses) return;
         if (mob.isBaby() && !config.affectAnimalBabies) return;
-
-        // Fase 4: Obtener configuración por dimensión
+        
         String dimensionKey = level.dimension().location().toString();
         DimensionSettings settings = DimensionDifficultyLoader.getSettings(dimensionKey);
 
@@ -36,7 +35,6 @@ public class DifficultyCalculator {
         double mobProtectionFactor = settings.startingFactor;
         double mobSpeedFactor = 1.0D;
 
-        // Validar si el Datapack reescribió las coordenadas de Spawn
         BlockPos spawnPos = level.getSharedSpawnPos();
         int spawnX = settings.distanceCoordinatesX != null ? settings.distanceCoordinatesX : spawnPos.getX();
         int spawnZ = settings.distanceCoordinatesZ != null ? settings.distanceCoordinatesZ : spawnPos.getZ();
@@ -45,7 +43,6 @@ public class DifficultyCalculator {
         long worldTime = level.getGameTime();
         int mobSpawnHeight = Mth.floor(mob.getY());
 
-        // 1. Distancia
         if (settings.increasingDistance != 0) {
             float distance = worldSpawnDistance - settings.startingDistance;
             if (distance > 0) {
@@ -59,7 +56,6 @@ public class DifficultyCalculator {
             }
         }
 
-        // 2. Tiempo
         if (settings.increasingTime != 0) {
             long time = worldTime - (settings.startingTime * 1200L);
             if (time > 0) {
@@ -73,7 +69,6 @@ public class DifficultyCalculator {
             }
         }
 
-        // 3. Altura
         if (!isBoss && settings.heightDistance != 0) {
             int spawnHeightDivided = (mobSpawnHeight - settings.startingHeight) / settings.heightDistance;
 
@@ -87,14 +82,12 @@ public class DifficultyCalculator {
             mobProtectionFactor += spawnHeightDivided * settings.heightFactor;
         }
 
-        // 4. Límites (Cutoff)
         double maxHealth = isBoss ? config.bossMaxFactor : settings.maxFactorHealth;
         mobHealthFactor = Math.min(mobHealthFactor, maxHealth);
         mobDamageFactor = Math.min(mobDamageFactor, settings.maxFactorDamage);
         mobProtectionFactor = Math.min(mobProtectionFactor, settings.maxFactorProtection);
         mobSpeedFactor = Math.min(mobSpeedFactor, settings.maxFactorSpeed);
 
-        // 5. Aleatoriedad
         if (config.allowRandomValues && level.random.nextFloat() <= (config.randomChance / 100f)) {
             float rFactor = config.randomFactor / 100f;
             double randomModifier = 1.0 - rFactor + (level.random.nextDouble() * rFactor * 2f);
@@ -102,19 +95,14 @@ public class DifficultyCalculator {
             mobDamageFactor *= randomModifier;
         }
 
-        // 5.5 Manejo de Big Zombie / Speed Zombie
         if (config.allowSpecialZombie && !mob.isBaby() && mob instanceof Zombie) {
             if (level.random.nextFloat() < (config.speedZombieChance / 100f)) {
-                // Zombie Veloz
                 mobHealthFactor -= (config.speedZombieMalusLifePoints / mob.getAttributeBaseValue(Attributes.MAX_HEALTH));
                 mobSpeedFactor *= config.speedZombieSpeedFactor;
                 mob.setData(ModAttachments.SPEEDY_ZOMBIE, true);
 
-                // Opcional y recomendado: Reducimos su tamaño un 15% para que encaje visualmente con su velocidad
                 AttributeHandler.applyModifier(mob, Attributes.SCALE, AttributeHandler.SCALE_MOD_ID, 0.85);
-
             } else if (level.random.nextFloat() < (config.bigZombieChance / 100f)) {
-                // Zombie Grande
                 mobSpeedFactor *= config.bigZombieSlownessFactor;
                 double healthBonusFactor = config.bigZombieBonusLifePoints / mob.getAttributeBaseValue(Attributes.MAX_HEALTH);
                 double damageBonusFactor = config.bigZombieBonusDamage / mob.getAttributeBaseValue(Attributes.ATTACK_DAMAGE);
@@ -122,33 +110,27 @@ public class DifficultyCalculator {
                 mobHealthFactor += healthBonusFactor;
                 mobDamageFactor += damageBonusFactor;
                 mob.setData(ModAttachments.BIG_ZOMBIE, true);
-
-                // Aplicamos el tamaño de la config directamente a la escala física del mob
+                
                 AttributeHandler.applyModifier(mob, Attributes.SCALE, AttributeHandler.SCALE_MOD_ID, config.bigZombieSize);
             }
         }
 
-        // Redondeo final
         mobHealthFactor = Math.round(mobHealthFactor * 100.0) / 100.0;
         mobDamageFactor = Math.round(mobDamageFactor * 100.0) / 100.0;
         mobProtectionFactor = Math.round(mobProtectionFactor * 100.0) / 100.0;
 
         mob.setData(ModAttachments.DIFFICULTY_MULTIPLIER, (float) mobHealthFactor);
-
-        // Aplicar
+        
         AttributeHandler.applyModifier(mob, Attributes.MAX_HEALTH, AttributeHandler.HEALTH_MOD_ID, mobHealthFactor);
-
-        // Verificación de Daño: Solo aplicamos si el mob realmente tiene un daño base de ataque
+        
         if (mob.getAttributes().hasAttribute(Attributes.ATTACK_DAMAGE)) {
             AttributeHandler.applyModifier(mob, Attributes.ATTACK_DAMAGE, AttributeHandler.DAMAGE_MOD_ID, mobDamageFactor);
         }
-
-        // Verificación de Armadura: Muchos mobs no tienen armadura base, pero si la tienen, la escalamos
+        
         if (mob.getAttributes().hasAttribute(Attributes.ARMOR)) {
             AttributeHandler.applyModifier(mob, Attributes.ARMOR, AttributeHandler.ARMOR_MOD_ID, mobProtectionFactor);
         }
-
-        // Verificación de Velocidad (Principalmente para los especiales, pero por seguridad)
+        
         if (mob.getAttributes().hasAttribute(Attributes.MOVEMENT_SPEED)) {
             AttributeHandler.applyModifier(mob, Attributes.MOVEMENT_SPEED, AttributeHandler.SPEED_MOD_ID, mobSpeedFactor);
         }
