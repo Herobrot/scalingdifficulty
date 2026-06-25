@@ -10,8 +10,5 @@
   },
   "overwrites": {
     "requireAnnotations": true
-  },
-  "client": [
-    "client.ZombieRendererMixin"
-  ]
+  }
 }

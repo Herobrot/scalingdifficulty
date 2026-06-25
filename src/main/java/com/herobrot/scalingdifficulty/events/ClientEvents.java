@@ -2,7 +2,7 @@ package com.herobrot.scalingdifficulty.events;
 
 import com.herobrot.scalingdifficulty.ScalingDifficulty;
 import com.herobrot.scalingdifficulty.config.ScalingDifficultyConfig;
-import com.herobrot.scalingdifficulty.data.ModAttachments;
+
 import me.shedaniel.autoconfig.AutoConfig;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
@@ -56,28 +56,32 @@ public class ClientEvents {
             EntityHitResult entityHitResult = (EntityHitResult) client.hitResult;
 
             if (entityHitResult.getEntity() instanceof Mob mob) {
-                float multiplier = mob.getData(ModAttachments.DIFFICULTY_MULTIPLIER);
+                // Leemos los atributos sincronizados de forma nativa por Minecraft
+                double maxHealth = mob.getAttributeValue(Attributes.MAX_HEALTH);
+                double baseHealth = mob.getAttributeBaseValue(Attributes.MAX_HEALTH);
+                double damage = mob.getAttributeValue(Attributes.ATTACK_DAMAGE);
+                double armor = mob.getAttributeValue(Attributes.ARMOR);
+                double scale = mob.getAttributeValue(Attributes.SCALE);
+
+                // Deducimos el multiplicador calculando la diferencia entre el valor base y el actual
+                float multiplier = (float) (maxHealth / baseHealth);
+
                 String entityName = net.minecraft.core.registries.BuiltInRegistries.ENTITY_TYPE.getKey(mob.getType()).getPath();
 
                 event.getGuiGraphics().drawString(client.font, "Target: §e" + entityName, x, y, color, true); y += step;
-                event.getGuiGraphics().drawString(client.font, "Stored Multiplier: §a" + String.format("%.2f", multiplier) + "x", x, y, color, true); y += step;
-
-                // Obtenemos los valores finales reales aplicados en la entidad
-                double maxHealth = mob.getAttributeValue(Attributes.MAX_HEALTH);
-                double damage = mob.getAttributeValue(Attributes.ATTACK_DAMAGE);
-                double armor = mob.getAttributeValue(Attributes.ARMOR);
+                event.getGuiGraphics().drawString(client.font, "Active Multiplier: §a" + String.format("%.2f", multiplier) + "x", x, y, color, true); y += step;
 
                 event.getGuiGraphics().drawString(client.font, "Health: §c" + String.format("%.1f", mob.getHealth()) + " / " + String.format("%.1f", maxHealth) + " §8(Max Cap: " + config.maxFactorHealth + "x)", x, y, color, true); y += step;
                 event.getGuiGraphics().drawString(client.font, "Damage: §c" + String.format("%.1f", damage) + " §8(Max Cap: " + config.maxFactorDamage + "x)", x, y, color, true); y += step;
                 event.getGuiGraphics().drawString(client.font, "Armor: §b" + String.format("%.1f", armor) + " §8(Max Cap: " + config.maxFactorProtection + "x)", x, y, color, true); y += step;
 
-                // Si es un Zombie Especial, lo destacamos
-                if (mob.getData(ModAttachments.BIG_ZOMBIE)) {
+                // Deducimos la variante especial leyendo la escala sincronizada
+                if (scale > 1.0) {
                     event.getGuiGraphics().drawString(client.font, "§6[SPECIAL VARIANT: BIG ZOMBIE]", x, y, color, true);
+                } else if (scale < 1.0) {
+                    event.getGuiGraphics().drawString(client.font, "§b[SPECIAL VARIANT: SPEEDY ZOMBIE]", x, y, color, true);
                 }
                 return; // Cortamos la ejecución para no dibujar el Modo Global
-                //FALTA SPEED ZOMBIE
-                //FALTA AGREGAR TRANSLATABLE PARA ID DE BIG ZOMBIE Y SPEEDY ZOMBIE
             }
         }
 

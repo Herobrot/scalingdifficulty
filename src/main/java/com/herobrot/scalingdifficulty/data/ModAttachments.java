@@ -33,4 +33,11 @@ public class ModAttachments {
                     .serialize(Codec.BOOL)
                     .build()
     );
+
+    public static final Supplier<AttachmentType<Boolean>> SPEEDY_ZOMBIE = ATTACHMENT_TYPES.register(
+            "speedy_zombie",
+            () -> AttachmentType.builder(() -> false)
+                    .serialize(Codec.BOOL)
+                    .build()
+    );
 }

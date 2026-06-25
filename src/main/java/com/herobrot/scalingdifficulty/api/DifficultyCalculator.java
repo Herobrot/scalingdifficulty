@@ -105,22 +105,26 @@ public class DifficultyCalculator {
         // 5.5 Manejo de Big Zombie / Speed Zombie
         if (config.allowSpecialZombie && !mob.isBaby() && mob instanceof Zombie) {
             if (level.random.nextFloat() < (config.speedZombieChance / 100f)) {
-                // Zombie Veloz: Pierde vida, gana velocidad
+                // Zombie Veloz
                 mobHealthFactor -= (config.speedZombieMalusLifePoints / mob.getAttributeBaseValue(Attributes.MAX_HEALTH));
                 mobSpeedFactor *= config.speedZombieSpeedFactor;
-            } else if (level.random.nextFloat() < (config.bigZombieChance / 100f)) {
-                // Zombie Grande: Lento, mucha vida y daño. Se marca visualmente.
-                mobSpeedFactor *= config.bigZombieSlownessFactor;
+                mob.setData(ModAttachments.SPEEDY_ZOMBIE, true);
 
-                // Convertimos los puntos de bonificación planos en un multiplicador factor para nuestra lógica
+                // Opcional y recomendado: Reducimos su tamaño un 15% para que encaje visualmente con su velocidad
+                AttributeHandler.applyModifier(mob, Attributes.SCALE, AttributeHandler.SCALE_MOD_ID, 0.85);
+
+            } else if (level.random.nextFloat() < (config.bigZombieChance / 100f)) {
+                // Zombie Grande
+                mobSpeedFactor *= config.bigZombieSlownessFactor;
                 double healthBonusFactor = config.bigZombieBonusLifePoints / mob.getAttributeBaseValue(Attributes.MAX_HEALTH);
                 double damageBonusFactor = config.bigZombieBonusDamage / mob.getAttributeBaseValue(Attributes.ATTACK_DAMAGE);
 
                 mobHealthFactor += healthBonusFactor;
                 mobDamageFactor += damageBonusFactor;
-
-                // Marcamos al zombie como "Big" en su NBT
                 mob.setData(ModAttachments.BIG_ZOMBIE, true);
+
+                // Aplicamos el tamaño de la config directamente a la escala física del mob
+                AttributeHandler.applyModifier(mob, Attributes.SCALE, AttributeHandler.SCALE_MOD_ID, config.bigZombieSize);
             }
         }
 
