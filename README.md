@@ -90,3 +90,31 @@ Example (`data/scalingdifficulty/difficulty/nether.json`):
     "negativeHeightIncrement": true
 }
 ```
+## FAQ
+### Q: Will it be a 1:1 version of the Fabric version?
+Yes and no. For now, it'll stay that way, but I plan to do my own thing while trying to keep it simple.
+### Q: What are your plans?
+Adding more mechanics like:
+- Creeper when can't reach the player but is in sight, still explodes but they fire off its head like a wither skull and explodes to the player
+- Spiders shooting web-spiders to slow the player
+- Skeletons do a shotgun-spread or rapid-fire every X time it shoot an arrow
+- And other mechanics if i get a better idea
+So in summary, adding mechanics and just not making the difficulty in numbers
+### Q: Do you have permission?
+Yes!!! I talked to Globox on Discord.
+### Q: What happens to StereoWalker?
+**Context:** StereoWalker was the previous programmer responsible for porting the Globox mods to NeoForge.
+
+Basically, StereoWalker has been missing for 8 months. I sent him an email on April 28, but as of this writing, I haven't received a reply.
+
+### Q: Will you create a port for each Globox mod?
+Yes and no, again.
+
+I definitely plan to develop a port for the following mods:
+- Rpgdifficulty (This One finish!!!!)
+- TieredZ ([Finish!!11!](https://github.com/Herobrot/tieredneo))
+- LevelZ
+- Nameplate
+- TravelerZ
+
+The other mods aren't my priority... And also because I've never tried or played them in the first place, but maybe if I get enough support, I might end up learning them and creating a proper port.
