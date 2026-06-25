@@ -1,8 +1,9 @@
 # ScalingDifficulty
-ScalingDifficulty is a mod that dynamically strengthens mobs over time, distance, and height, ensuring the game's challenge scales naturally as you progress through your world.
+ScalingDifficulty is a mod and a **port** of [RpgDifficulty](https://github.com/Globox1997/RpgDifficulty) from **Globox** that dynamically strengthens mobs over time, distance, and height, ensuring the game's challenge scales naturally as you progress through your world.
+
 
 ### Installation
-ScalingDifficulty is built for [NeoForge](https://neoforged.net/) (1.21.1). It requires the [Cloth Config API](https://www.curseforge.com/minecraft/mc-mods/cloth-config) to be installed separately in your mods folder.
+ScalingDifficulty is built for [NeoForge](https://neoforged.net/). It requires the [Cloth Config API](https://modrinth.com/mod/cloth-config) to be installed separately in your mods folder.
 
 ### Config
 - `increasingDistance`: distance in blocks to increase the strength of mobs by the `distanceFactor`. <br>
