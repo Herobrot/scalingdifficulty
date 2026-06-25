@@ -137,8 +137,20 @@ public class DifficultyCalculator {
 
         // Aplicar
         AttributeHandler.applyModifier(mob, Attributes.MAX_HEALTH, AttributeHandler.HEALTH_MOD_ID, mobHealthFactor);
-        AttributeHandler.applyModifier(mob, Attributes.ATTACK_DAMAGE, AttributeHandler.DAMAGE_MOD_ID, mobDamageFactor);
-        AttributeHandler.applyModifier(mob, Attributes.ARMOR, AttributeHandler.ARMOR_MOD_ID, mobProtectionFactor);
-        AttributeHandler.applyModifier(mob, Attributes.MOVEMENT_SPEED, AttributeHandler.SPEED_MOD_ID, mobSpeedFactor);
+
+        // Verificación de Daño: Solo aplicamos si el mob realmente tiene un daño base de ataque
+        if (mob.getAttributes().hasAttribute(Attributes.ATTACK_DAMAGE)) {
+            AttributeHandler.applyModifier(mob, Attributes.ATTACK_DAMAGE, AttributeHandler.DAMAGE_MOD_ID, mobDamageFactor);
+        }
+
+        // Verificación de Armadura: Muchos mobs no tienen armadura base, pero si la tienen, la escalamos
+        if (mob.getAttributes().hasAttribute(Attributes.ARMOR)) {
+            AttributeHandler.applyModifier(mob, Attributes.ARMOR, AttributeHandler.ARMOR_MOD_ID, mobProtectionFactor);
+        }
+
+        // Verificación de Velocidad (Principalmente para los especiales, pero por seguridad)
+        if (mob.getAttributes().hasAttribute(Attributes.MOVEMENT_SPEED)) {
+            AttributeHandler.applyModifier(mob, Attributes.MOVEMENT_SPEED, AttributeHandler.SPEED_MOD_ID, mobSpeedFactor);
+        }
     }
 }

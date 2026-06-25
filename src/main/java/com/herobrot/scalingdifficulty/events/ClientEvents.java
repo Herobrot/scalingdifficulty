@@ -56,26 +56,60 @@ public class ClientEvents {
             EntityHitResult entityHitResult = (EntityHitResult) client.hitResult;
 
             if (entityHitResult.getEntity() instanceof Mob mob) {
-                // Leemos los atributos sincronizados de forma nativa por Minecraft
-                double maxHealth = mob.getAttributeValue(Attributes.MAX_HEALTH);
-                double baseHealth = mob.getAttributeBaseValue(Attributes.MAX_HEALTH);
-                double damage = mob.getAttributeValue(Attributes.ATTACK_DAMAGE);
-                double armor = mob.getAttributeValue(Attributes.ARMOR);
-                double scale = mob.getAttributeValue(Attributes.SCALE);
 
-                // Deducimos el multiplicador calculando la diferencia entre el valor base y el actual
-                float multiplier = (float) (maxHealth / baseHealth);
+                // Lectura segura de la base del cliente
+                double maxHealth = mob.getAttributes().hasAttribute(Attributes.MAX_HEALTH) ? mob.getAttributeValue(Attributes.MAX_HEALTH) : 0.0;
+                double baseHealth = mob.getAttributes().hasAttribute(Attributes.MAX_HEALTH) ? mob.getAttributeBaseValue(Attributes.MAX_HEALTH) : 1.0;
+                double baseDamage = mob.getAttributes().hasAttribute(Attributes.ATTACK_DAMAGE) ? mob.getAttributeBaseValue(Attributes.ATTACK_DAMAGE) : 0.0;
+                double baseArmor = mob.getAttributes().hasAttribute(Attributes.ARMOR) ? mob.getAttributeBaseValue(Attributes.ARMOR) : 0.0;
+                double scale = mob.getAttributes().hasAttribute(Attributes.SCALE) ? mob.getAttributeValue(Attributes.SCALE) : 1.0;
+
+                // 1. Ingeniería inversa: Deducimos el multiplicador desde la salud (que sí está sincronizada)
+                float rawMultiplier = (float) (maxHealth / baseHealth);
+                float baseMultiplier = rawMultiplier;
+                float damageMultiplier = rawMultiplier;
+
+                // 2. Ajustamos si es una variante especial (ya que la salud está alterada y engaña al multiplicador raw)
+                if (scale > 1.0f && baseHealth > 0) {
+                    // Big Zombie: Restamos el bono de vida plano para encontrar el multiplicador original
+                    double healthBonus = config.bigZombieBonusLifePoints / baseHealth;
+                    baseMultiplier = (float) (rawMultiplier - healthBonus);
+                    // Añadimos el bono de daño
+                    double damageBonus = baseDamage > 0 ? (config.bigZombieBonusDamage / baseDamage) : 0;
+                    damageMultiplier = (float) (baseMultiplier + damageBonus);
+                } else if (scale < 1.0f && baseHealth > 0) {
+                    // Speedy Zombie: Sumamos el malus de vida para encontrar el multiplicador original
+                    double healthMalus = config.speedZombieMalusLifePoints / baseHealth;
+                    baseMultiplier = (float) (rawMultiplier + healthMalus);
+                    damageMultiplier = baseMultiplier;
+                }
+
+                // Aplicar los límites de la configuración para la pantalla
+                damageMultiplier = (float) Math.min(damageMultiplier, config.maxFactorDamage);
+                float armorMultiplier = (float) Math.min(baseMultiplier, config.maxFactorProtection);
+
+                // Calculamos el valor final de visualización
+                double displayDamage = baseDamage * damageMultiplier;
+                double displayArmor = baseArmor * armorMultiplier;
 
                 String entityName = net.minecraft.core.registries.BuiltInRegistries.ENTITY_TYPE.getKey(mob.getType()).getPath();
 
                 event.getGuiGraphics().drawString(client.font, "Target: §e" + entityName, x, y, color, true); y += step;
-                event.getGuiGraphics().drawString(client.font, "Active Multiplier: §a" + String.format("%.2f", multiplier) + "x", x, y, color, true); y += step;
+                event.getGuiGraphics().drawString(client.font, "Active Multiplier: §a" + String.format("%.2f", baseMultiplier) + "x", x, y, color, true); y += step;
 
                 event.getGuiGraphics().drawString(client.font, "Health: §c" + String.format("%.1f", mob.getHealth()) + " / " + String.format("%.1f", maxHealth) + " §8(Max Cap: " + config.maxFactorHealth + "x)", x, y, color, true); y += step;
-                event.getGuiGraphics().drawString(client.font, "Damage: §c" + String.format("%.1f", damage) + " §8(Max Cap: " + config.maxFactorDamage + "x)", x, y, color, true); y += step;
-                event.getGuiGraphics().drawString(client.font, "Armor: §b" + String.format("%.1f", armor) + " §8(Max Cap: " + config.maxFactorProtection + "x)", x, y, color, true); y += step;
 
-                // Deducimos la variante especial leyendo la escala sincronizada
+                if (baseDamage > 0) {
+                    event.getGuiGraphics().drawString(client.font, "Damage: §c" + String.format("%.1f", displayDamage) + " §8(Max Cap: " + config.maxFactorDamage + "x)", x, y, color, true); y += step;
+                } else {
+                    event.getGuiGraphics().drawString(client.font, "Damage: §7[No Base Damage]", x, y, color, true); y += step;
+                }
+
+                if (baseArmor > 0) {
+                    event.getGuiGraphics().drawString(client.font, "Armor: §b" + String.format("%.1f", displayArmor) + " §8(Max Cap: " + config.maxFactorProtection + "x)", x, y, color, true); y += step;
+                }
+
+                // Deducimos la variante especial leyendo la escala
                 if (scale > 1.0) {
                     event.getGuiGraphics().drawString(client.font, "§6[SPECIAL VARIANT: BIG ZOMBIE]", x, y, color, true);
                 } else if (scale < 1.0) {
@@ -87,27 +121,43 @@ public class ClientEvents {
 
         // 2. MODO GLOBAL: Seguimiento en vivo (No apuntando a un mob)
         Level level = player.level();
+
+        // ¡Corrección! Cargamos los settings de la dimensión actual
+        String dimensionKey = level.dimension().location().toString();
+        com.herobrot.scalingdifficulty.data.DimensionSettings settings = com.herobrot.scalingdifficulty.data.DimensionDifficultyLoader.getSettings(dimensionKey);
+
         BlockPos spawnPos = level.getSharedSpawnPos();
-        float distance = Mth.sqrt((float) player.distanceToSqr(spawnPos.getX(), player.getY(), spawnPos.getZ()));
+
+        // Usar coordenadas forzadas del Datapack si existen
+        int spawnX = settings.distanceCoordinatesX != null ? settings.distanceCoordinatesX : spawnPos.getX();
+        int spawnZ = settings.distanceCoordinatesZ != null ? settings.distanceCoordinatesZ : spawnPos.getZ();
+
+        float distance = Mth.sqrt((float) player.distanceToSqr(spawnX, player.getY(), spawnZ));
         long worldTime = level.getGameTime();
 
-        // Matemáticas simuladas para mostrar en tiempo real
-        float distElapsed = distance - config.startingDistance;
-        int distDivided = distElapsed > 0 ? (int) (distElapsed / config.increasingDistance) : 0;
-        double distBonus = distDivided * config.distanceFactor;
+        // Matemáticas simuladas con los settings de la dimensión
+        float distElapsed = distance - settings.startingDistance;
+        int distDivided = distElapsed > 0 ? (int) (distElapsed / settings.increasingDistance) : 0;
+        if (config.excludeDistanceInOtherDimension && level.dimension() != Level.OVERWORLD) distDivided = 0;
+        double distBonus = distDivided * settings.distanceFactor;
 
-        long timeElapsed = worldTime - (config.startingTime * 1200L);
-        int timeDivided = timeElapsed > 0 ? (int) (timeElapsed / (config.increasingTime * 1200L)) : 0;
-        double timeBonus = timeDivided * config.timeFactor;
+        long timeElapsed = worldTime - (settings.startingTime * 1200L);
+        int timeDivided = timeElapsed > 0 ? (int) (timeElapsed / (settings.increasingTime * 1200L)) : 0;
+        if (config.excludeTimeInOtherDimension && level.dimension() != Level.OVERWORLD) timeDivided = 0;
+        double timeBonus = timeDivided * settings.timeFactor;
 
-        int spawnHeightDivided = (Mth.floor(player.getY()) - config.startingHeight) / config.heightDistance;
-        if (!config.positiveHeightIncrement && spawnHeightDivided > 0) spawnHeightDivided = 0;
-        if (!config.negativeHeightIncrement && spawnHeightDivided < 0) spawnHeightDivided = 0;
-        double heightBonus = Math.abs(spawnHeightDivided) * config.heightFactor;
+        int spawnHeightDivided = (Mth.floor(player.getY()) - settings.startingHeight) / settings.heightDistance;
+        if (!settings.positiveHeightIncrement && spawnHeightDivided > 0) spawnHeightDivided = 0;
+        if (!settings.negativeHeightIncrement && spawnHeightDivided < 0) spawnHeightDivided = 0;
+        if (config.excludeHeightInOtherDimension && level.dimension() != Level.OVERWORLD) spawnHeightDivided = 0;
+        double heightBonus = Math.abs(spawnHeightDivided) * settings.heightFactor;
 
-        double totalFactor = config.startingFactor + distBonus + timeBonus + heightBonus;
+        double totalFactor = settings.startingFactor + distBonus + timeBonus + heightBonus;
 
-        event.getGuiGraphics().drawString(client.font, "§7[Live Global Tracker]", x, y, color, true); y += step;
+        // Limite simulado para el visualizador
+        totalFactor = Math.min(totalFactor, settings.maxFactorHealth);
+
+        event.getGuiGraphics().drawString(client.font, "§7[Live Global Tracker - " + dimensionKey + "]", x, y, color, true); y += step;
         event.getGuiGraphics().drawString(client.font, "Distance: §7" + (int)distance + "m §8-> §a+" + String.format("%.2f", distBonus), x, y, color, true); y += step;
         event.getGuiGraphics().drawString(client.font, "Time: §7" + (worldTime / 24000) + " days §8-> §a+" + String.format("%.2f", timeBonus), x, y, color, true); y += step;
         event.getGuiGraphics().drawString(client.font, "Height: §7" + (int)player.getY() + " Y §8-> §a+" + String.format("%.2f", heightBonus), x, y, color, true); y += step;

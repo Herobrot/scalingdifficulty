@@ -60,11 +60,11 @@ public class ScalingDifficultyConfig implements ConfigData {
 
     public boolean affectBosses = true;
     @ConfigEntry.Gui.Tooltip
-    public boolean excludeDistanceInOtherDimension = true;
+    public boolean excludeDistanceInOtherDimension = false;
     @ConfigEntry.Gui.Tooltip
-    public boolean excludeTimeInOtherDimension = true;
+    public boolean excludeTimeInOtherDimension = false;
     @ConfigEntry.Gui.Tooltip
-    public boolean excludeHeightInOtherDimension = true;
+    public boolean excludeHeightInOtherDimension = false;
     @ConfigEntry.Gui.Tooltip
     public boolean dropMoreLoot = false;
     @ConfigEntry.Gui.Tooltip
@@ -72,6 +72,8 @@ public class ScalingDifficultyConfig implements ConfigData {
     public float maxLootChance = 0.7F;
     @ConfigEntry.Gui.Tooltip
     public float chanceForEachItem = 0.5F;
+
+    //TODO until LevelZ is ported
     @ConfigEntry.Gui.Tooltip
     public double levelFactor = 0.0D;
     @ConfigEntry.Gui.Tooltip
