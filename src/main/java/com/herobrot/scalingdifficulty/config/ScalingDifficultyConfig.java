@@ -66,7 +66,7 @@ public class ScalingDifficultyConfig implements ConfigData {
     @ConfigEntry.Gui.Tooltip
     public boolean excludeHeightInOtherDimension = false;
     @ConfigEntry.Gui.Tooltip
-    public boolean dropMoreLoot = false;
+    public boolean dropMoreLoot = true;
     @ConfigEntry.Gui.Tooltip
     public float moreLootChance = 0.02F;
     public float maxLootChance = 0.7F;

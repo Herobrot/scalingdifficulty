@@ -2,6 +2,7 @@ package com.herobrot.scalingdifficulty.events;
 
 import com.herobrot.scalingdifficulty.ScalingDifficulty;
 import com.herobrot.scalingdifficulty.api.DifficultyCalculator;
+import com.herobrot.scalingdifficulty.compat.LevelplateCompat;
 import com.herobrot.scalingdifficulty.data.ModAttachments;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.DamageTypeTags;
@@ -52,22 +53,30 @@ public class EntityEvents {
     @SuppressWarnings("resource")
     public static void onLivingDrops(LivingDropsEvent event) {
         if (!ScalingDifficulty.CONFIG.dropMoreLoot) return;
-        if (event.getEntity() instanceof Mob mob) {
-            float multiplier = mob.getData(ModAttachments.DIFFICULTY_MULTIPLIER);
-            if (multiplier > 0.01f) {
-                float dropChance = multiplier * ScalingDifficulty.CONFIG.moreLootChance;
-                dropChance = Math.min(dropChance, ScalingDifficulty.CONFIG.maxLootChance);
+        if (!(event.getEntity() instanceof Mob mob)) return;
 
-                if (mob.level().random.nextFloat() <= dropChance) {
-                    for (ItemEntity drop : event.getDrops()) {
-                        if (mob.level().random.nextFloat() >= ScalingDifficulty.CONFIG.chanceForEachItem) {
-                            ItemStack stack = drop.getItem();
-                            int bonus = (int) (stack.getCount() * dropChance);
-                            if (bonus > 0) {
-                                stack.grow(bonus);
-                                drop.setItem(stack);
-                            }
-                        }
+        float dropChance;
+
+        if (ScalingDifficulty.isLevelplateLoaded) {
+            int mobLevel = LevelplateCompat.getMobLevel(mob);
+            if (mobLevel <= 1) return;
+            dropChance = mobLevel * ScalingDifficulty.CONFIG.moreLootChance;
+        } else {
+            float multiplier = mob.getData(ModAttachments.DIFFICULTY_MULTIPLIER);
+            if (multiplier <= 1.0f) return;
+            dropChance = multiplier * ScalingDifficulty.CONFIG.moreLootChance;
+        }
+
+        dropChance = Math.min(dropChance, ScalingDifficulty.CONFIG.maxLootChance);
+
+        if (mob.level().random.nextFloat() <= dropChance) {
+            for (ItemEntity drop : event.getDrops()) {
+                if (mob.level().random.nextFloat() >= ScalingDifficulty.CONFIG.chanceForEachItem) {
+                    ItemStack stack = drop.getItem();
+                    int bonus = (int) (stack.getCount() * dropChance);
+                    if (bonus > 0) {
+                        stack.grow(bonus);
+                        drop.setItem(stack);
                     }
                 }
             }
