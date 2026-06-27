@@ -1,15 +1,21 @@
 package com.herobrot.scalingdifficulty.events;
 
 import com.herobrot.scalingdifficulty.ScalingDifficulty;
+import com.herobrot.scalingdifficulty.commands.DiagnosticCommand;
 import com.herobrot.scalingdifficulty.data.DimensionDifficultyLoader;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.AddReloadListenerEvent;
+import net.neoforged.neoforge.event.RegisterCommandsEvent;
 
 @EventBusSubscriber(modid = ScalingDifficulty.MOD_ID)
 public class ServerEvents {
     @SubscribeEvent
     public static void onAddReloadListeners(AddReloadListenerEvent event) {
         event.addListener(new DimensionDifficultyLoader());
+    }
+    @SubscribeEvent
+    public static void onRegisterCommands(RegisterCommandsEvent event) {
+        DiagnosticCommand.register(event.getDispatcher());
     }
 }
