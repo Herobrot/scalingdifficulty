@@ -1,3 +1,14 @@
+# 1.0.1
+## Added:
+- Levelplate compat
+- Added command `sddiag` to check the lootDropChance increase
+## Fixed:
+- Fixed boss config not applied
+- Fixed time using gameTime and not dayTime, making the server not change difficulty with time commands
+## Changed:
+- Boosted drop chance
+- HUD Debug in time now using minutes
+---
 # 1.0.0
 ## Added:
 - Initial release

@@ -30,6 +30,9 @@ repositories {
     maven { url = "https://maven.terraformersmc.com/" }
     maven { url = "https://api.modrinth.com/maven" }
     mavenCentral()
+    flatDir(){
+        dirs("libs")
+    }
 }
 
 base {
@@ -99,6 +102,7 @@ configurations {
 
 dependencies {
     implementation("me.shedaniel.cloth:cloth-config-neoforge:${cloth_config_version}")
+    compileOnly("com.herobrot.levelplate:levelplate:${levelplate_version}")
 
     //Test
     //runtimeOnly "maven.modrinth:jade:${project.jade_version}"
