@@ -64,7 +64,9 @@ public class EntityEvents {
         } else {
             float multiplier = mob.getData(ModAttachments.DIFFICULTY_MULTIPLIER);
             if (multiplier <= 1.0f) return;
-            dropChance = multiplier * ScalingDifficulty.CONFIG.moreLootChance;
+            int simulatedLevel = (int) (10 * multiplier - 10);
+            if (simulatedLevel < 1) simulatedLevel = 1;
+            dropChance = simulatedLevel * ScalingDifficulty.CONFIG.moreLootChance;
         }
 
         dropChance = Math.min(dropChance, ScalingDifficulty.CONFIG.maxLootChance);

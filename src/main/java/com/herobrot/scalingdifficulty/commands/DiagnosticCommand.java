@@ -58,9 +58,14 @@ public class DiagnosticCommand {
                         sb.append("Nivel calculado: ").append(level).append("\n");
                         sb.append("Drop chance: ").append(String.format("%.2f%%", dropChance * 100)).append("\n");
                     } else {
-                        float dropChance = Math.min(multiplier * ScalingDifficulty.CONFIG.moreLootChance,
+                        int simulatedLevel = (int) (10 * multiplier - 10);
+                        if (simulatedLevel < 1) simulatedLevel = 1;
+
+                        float dropChance = Math.min(simulatedLevel * ScalingDifficulty.CONFIG.moreLootChance,
                                 ScalingDifficulty.CONFIG.maxLootChance);
-                        sb.append("Drop chance (sin Levelplate): ")
+                        sb.append("--- Sin Levelplate ---\n");
+                        sb.append("Nivel Simulado: ").append(simulatedLevel).append("\n");
+                        sb.append("Drop chance: ")
                                 .append(String.format("%.2f%%", dropChance * 100)).append("\n");
                     }
 
