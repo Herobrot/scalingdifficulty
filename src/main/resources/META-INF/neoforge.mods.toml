@@ -4,7 +4,7 @@ license = "MIT License"
 
 [[mods]]
 modId = "scalingdifficulty"
-version = "${file.jarVersion}"
+version = "1.0.1"
 displayName = "ScalingDifficulty"
 credits = "Globox"
 authors = "Herobrot"
