@@ -1,13 +1,9 @@
-import net.darkhax.curseforgegradle.TaskPublishCurseForge
-
 plugins {
     id 'java-library'
     id 'maven-publish'
     id 'net.neoforged.moddev' version '2.0.141'
     id 'idea'
-    id "com.modrinth.minotaur" version "2.8.7"
-    id "net.darkhax.curseforgegradle" version "1.1.25"
-    id "com.github.breadmoirai.github-release" version "2.4.1"
+    id "me.modmuss50.mod-publish-plugin" version "2.1.1"
 }
 
 tasks.named('wrapper', Wrapper).configure {
@@ -158,60 +154,38 @@ def getChangelogText() {
     if (!changelogFile.exists()) {
         return "No changelog found."
     }
-
     def text = changelogFile.text
     def matcher = text =~ /(?s)^(# .*?\n)(.*?)(?=\n# |\n---|\Z)/
-
     if (matcher.find()) {
         return matcher.group(2).trim()
     }
     return text.trim()
 }
 
-githubRelease {
-    token = System.getenv("GITHUB_TOKEN") ?: ""
-    owner = "Herobrot"
-    repo = mod_id
-    tagName = "${project.version}+${minecraft_version}"
-    targetCommitish = "1.21"
-    releaseName = "${mod_name} ${project.version}+${minecraft_version}"
-    body = getChangelogText()
-    releaseAssets(tasks.named("jar"), tasks.named("sourcesJar"))
-}
-
-modrinth {
-    token.set(System.getenv("MODRINTH_TOKEN") ?: "")
-    projectId.set(mod_id)
-    versionNumber.set("${project.version}+${minecraft_version}")
-    versionName.set("${mod_name} ${project.version}")
-    versionType.set(release_type)
-    gameVersions.set([minecraft_version])
-    loaders.set(["neoforge"])
-    changelog.set(getChangelogText())
-    uploadFile.set(tasks.named("jar"))
-
-    dependencies {
-        required.project("cloth-config")
+publishMods {
+    file = jar.archiveFile
+    changelog = getChangelogText()
+    type = STABLE
+    modLoaders.add("neoforge")
+    curseforge {
+        accessToken = providers.environmentVariable("CURSEFORGE_TOKEN")
+        projectId = curseforge_id
+        minecraftVersions.add(minecraft_version)
+        client = false
+        server = true
+        requires("cloth-config")
     }
-}
-
-tasks.register('curseforge', TaskPublishCurseForge) {
-    dependsOn tasks.named("jar")
-    group = 'publishing'
-    apiToken = System.getenv('CURSEFORGE_TOKEN') ?: "0"
-
-    def uploadFile = upload(curseforge_id, jar.archiveFile.get().asFile)
-
-    uploadFile.changelog = getChangelogText().replaceAll('\n', '\n\n')
-    uploadFile.changelogType = 'markdown'
-    uploadFile.addModLoader('NeoForge')
-
-    uploadFile.addGameVersion(minecraft_version)
-    uploadFile.addGameVersion('Client', 'Server')
-    uploadFile.addJavaVersion('Java 21')
-    uploadFile.releaseType = release_type
-
-    uploadFile.addRequirement('cloth-config')
+    modrinth {
+        accessToken = providers.environmentVariable("MODRINTH_TOKEN")
+        projectId = modrinth_id
+        minecraftVersions.add(minecraft_version)
+        requires("cloth-config")
+    }
+    github {
+        accessToken = providers.environmentVariable("GITHUB_TOKEN")
+        repository = "Herobrot/${mod_id}"
+        commitish = "1.21"
+    }
 }
 
 tasks.register("publishMod") {
