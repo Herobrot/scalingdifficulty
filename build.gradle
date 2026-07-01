@@ -5,106 +5,77 @@ plugins {
     id 'idea'
     id "me.modmuss50.mod-publish-plugin" version "2.1.1"
 }
-
 tasks.named('wrapper', Wrapper).configure {
-
     distributionType = Wrapper.DistributionType.BIN
 }
-
 version = mod_version
 group = mod_group_id
-
 sourceSets.main.resources {
     srcDir('src/generated/resources')
-
     exclude("**/*.bbmodel")
     exclude("src/generated/**/.cache")
 }
-
 repositories {
     maven { url = "https://maven.shedaniel.me/" }
     maven { url = "https://maven.terraformersmc.com/" }
     maven { url = "https://api.modrinth.com/maven" }
     mavenCentral()
-    flatDir(){
+    flatDir {
         dirs("libs")
     }
 }
-
 base {
     archivesName = mod_id
 }
-
 java.toolchain.languageVersion = JavaLanguageVersion.of(21)
-
 neoForge {
-
     version = project.neo_version
-
     parchment {
         mappingsVersion = project.parchment_mappings_version
         minecraftVersion = project.parchment_minecraft_version
     }
-
     java {
         withSourcesJar()
     }
-
     accessTransformers = project.files('src/main/resources/META-INF/accesstransformer.cfg')
-
     runs {
         client {
             client()
-
             systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
         }
-
         server {
             server()
             programArgument '--nogui'
             systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
         }
-
         gameTestServer {
             type = "gameTestServer"
             systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
         }
-
         data {
             data()
-
             programArguments.addAll '--mod', project.mod_id, '--all', '--output', file('src/generated/resources/').getAbsolutePath(), '--existing', file('src/main/resources/').getAbsolutePath()
         }
-
         configureEach {
-
             systemProperty 'forge.logging.markers', 'REGISTRIES'
-
             logLevel = org.slf4j.event.Level.DEBUG
         }
     }
-
     mods {
-
         "${mod_id}" {
             sourceSet(sourceSets.main)
         }
     }
 }
-
 configurations {
     runtimeClasspath.extendsFrom localRuntime
 }
-
 dependencies {
     implementation("me.shedaniel.cloth:cloth-config-neoforge:${cloth_config_version}")
     compileOnly("com.herobrot.levelplate:levelplate:${levelplate_version}")
-
-    //Test
-    //runtimeOnly "maven.modrinth:jade:${project.jade_version}"
+    // runtimeOnly "maven.modrinth:jade:${project.jade_version}"
 }
-
-var generateModMetadata = tasks.register("generateModMetadata", ProcessResources) {
+tasks.named('processResources', ProcessResources) {
     var replaceProperties = [
             minecraft_version      : minecraft_version,
             minecraft_version_range: minecraft_version_range,
@@ -113,17 +84,13 @@ var generateModMetadata = tasks.register("generateModMetadata", ProcessResources
             mod_id                 : mod_id,
             mod_name               : mod_name,
             mod_license            : mod_license,
-            mod_version            : mod_version,
+            mod_version            : mod_version
     ]
-    inputs.properties replaceProperties
-    expand replaceProperties
-    from "src/main/templates"
-    into "build/generated/sources/modMetadata"
+    inputs.properties(replaceProperties)
+    filesMatching('META-INF/neoforge.mods.toml') {
+        expand(replaceProperties)
+    }
 }
-
-sourceSets.main.resources.srcDir generateModMetadata
-
-neoForge.ideSyncTask generateModMetadata
 
 publishing {
     publications {
@@ -133,7 +100,7 @@ publishing {
     }
     repositories {
         maven {
-            url "file://${project.projectDir}/repo"
+            url = "file://${project.projectDir}/repo"
         }
     }
 }
@@ -156,12 +123,12 @@ def getChangelogText() {
     }
     def text = changelogFile.text
     def matcher = text =~ /(?s)^(# .*?\n)(.*?)(?=\n# |\n---|\Z)/
+
     if (matcher.find()) {
         return matcher.group(2).trim()
     }
     return text.trim()
 }
-
 publishMods {
     file = jar.archiveFile
     changelog = getChangelogText()
@@ -171,29 +138,26 @@ publishMods {
         accessToken = providers.environmentVariable("CURSEFORGE_TOKEN")
         projectId = curseforge_id
         minecraftVersions.add(minecraft_version)
-        client = false
+        javaVersions.add(JavaVersion.VERSION_21)
+        client = true
         server = true
         requires("cloth-config")
+        optional("levelplate")
+        changelogType = "markdown"
+        displayName = jar.archiveFileName.get()
     }
     modrinth {
         accessToken = providers.environmentVariable("MODRINTH_TOKEN")
         projectId = modrinth_id
         minecraftVersions.add(minecraft_version)
         requires("cloth-config")
+        environment = SERVER_ONLY_CLIENT_OPTIONAL
     }
     github {
         accessToken = providers.environmentVariable("GITHUB_TOKEN")
         repository = "Herobrot/${mod_id}"
+        tagName="${mod_id}+${minecraft_version}"
         commitish = "1.21"
+        additionalFiles.from(tasks.named("sourcesJar"))
     }
-}
-
-tasks.register("publishMod") {
-    group = "publishing"
-    description = "Construye el mod y lo distribuye de forma automatizada."
-    dependsOn build
-
-    if (System.getenv("GITHUB_TOKEN") != null) finalizedBy tasks.named("githubRelease")
-    if (System.getenv("CURSEFORGE_TOKEN") != null) finalizedBy tasks.named("curseforge")
-    if (System.getenv("MODRINTH_TOKEN") != null) finalizedBy tasks.named("modrinth")
 }
