@@ -98,6 +98,9 @@ Adding more mechanics like:
 - Creeper when can't reach the player but is in sight, still explodes but they fire off its head like a wither skull and explodes to the player
 - Spiders shooting web-spiders to slow the player
 - Skeletons do a shotgun-spread or rapid-fire every X time it shoot an arrow
+- Adding a extra mob factor, for example:
+  - Passive mobs scaling the same
+  - But hostile mobs maybe gets an extra "0.2x" so, with Levelplate, appears Pigs with Lv 1 but Zombies already Lv 3
 - And other mechanics if i get a better idea
 So in summary, adding mechanics and just not making the difficulty in numbers
 ### Q: Do you have permission?
