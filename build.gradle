@@ -19,6 +19,7 @@ repositories {
     maven { url = "https://maven.shedaniel.me/" }
     maven { url = "https://maven.terraformersmc.com/" }
     maven { url = "https://api.modrinth.com/maven" }
+    maven { url = "https://maven.theillusivec4.top/" }
     mavenCentral()
     flatDir {
         dirs("libs")
@@ -74,6 +75,14 @@ dependencies {
     implementation("me.shedaniel.cloth:cloth-config-neoforge:${cloth_config_version}")
     compileOnly("com.herobrot.levelplate:levelplate:${levelplate_version}")
     // runtimeOnly "maven.modrinth:jade:${project.jade_version}"
+
+    // Test
+    // l_enders-cataclysm
+    //runtimeOnly("maven.modrinth:46KJle7n:695vQRhD")
+    // lionfish ^^^^^^ dependecy
+    //runtimeOnly("maven.modrinth:FoVacERa:fTRMVgyZ")
+    //runtimeOnly "top.theillusivec4.curios:curios-neoforge:9.5.1+1.21.1"
+    //compileOnly "top.theillusivec4.curios:curios-neoforge:9.5.1+1.21.1:api"
 }
 tasks.named('processResources', ProcessResources) {
     var replaceProperties = [
@@ -157,6 +166,7 @@ publishMods {
         accessToken = providers.environmentVariable("GITHUB_TOKEN")
         repository = "Herobrot/${mod_id}"
         tagName="${mod_id}+${minecraft_version}"
+        displayName = "${mod_name} ${mod_version}+${minecraft_version}"
         commitish = "1.21"
         additionalFiles.from(tasks.named("sourcesJar"))
     }

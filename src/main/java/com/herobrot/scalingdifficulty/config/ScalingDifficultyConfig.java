@@ -116,7 +116,7 @@ public class ScalingDifficultyConfig implements ConfigData {
     @ConfigEntry.Category("monster_setting")
     public double bossMaxFactor = 3.0D;
     @ConfigEntry.Category("monster_setting")
-    public double bossDistanceFactor = 0.0D;
+    public double bossDistanceFactor = 0.05D;
     @ConfigEntry.Category("monster_setting")
     public double bossTimeFactor = 0.1D;
     @ConfigEntry.Category("monster_setting")
