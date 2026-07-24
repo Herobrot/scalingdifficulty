@@ -113,8 +113,8 @@ Yes and no, again.
 I definitely plan to develop a port for the following mods:
 - Rpgdifficulty (This One finish!!!!)
 - TieredZ ([Finish!!11!](https://github.com/Herobrot/tieredneo))
-- LevelZ
-- Nameplate
-- TravelerZ
+- LevelZ ([IN PROGRESS](https://github.com/Herobrot/heroslevels))
+- Nameplate ([FINISH!](https://github.com/Herobrot/levelplate))
+- TravelerZ ([FINISH! :D](https://github.com/Herobrot/expedition))
 
 The other mods aren't my priority... And also because I've never tried or played them in the first place, but maybe if I get enough support, I might end up learning them and creating a proper port.
