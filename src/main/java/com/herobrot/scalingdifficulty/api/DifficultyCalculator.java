@@ -11,9 +11,15 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.util.Mth;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.boss.enderdragon.EnderDragon;
+import net.minecraft.world.entity.monster.Creeper;
+import net.minecraft.world.entity.monster.Guardian;
 import net.minecraft.world.entity.monster.Zombie;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.storage.loot.LootParams;
@@ -175,5 +181,34 @@ public class DifficultyCalculator {
 
         float dropChance = multiplier * ScalingDifficulty.CONFIG.moreLootChance;
         return Math.min(dropChance, ScalingDifficulty.CONFIG.maxLootChance);
+    }
+
+    public static int scaleExperience(Mob mob, int originalXp) {
+        if (!ScalingDifficulty.CONFIG.extraXp) return originalXp;
+        float multiplier = mob.getData(ModAttachments.DIFFICULTY_MULTIPLIER);
+        if (multiplier > 1.0f) {
+            float cappedMultiplier = Math.min(multiplier, ScalingDifficulty.CONFIG.maxXPFactor);
+            return (int) (originalXp * cappedMultiplier);
+        }
+        return originalXp;
+    }
+
+    public static float scaleDamage(Mob mob, float originalDamage, DamageSource source) {
+        Entity directEntity = source.getDirectEntity();
+
+        boolean isIndirectOrSpecial = directEntity != mob ||
+                source.is(DamageTypeTags.IS_PROJECTILE) ||
+                source.is(DamageTypeTags.IS_EXPLOSION) ||
+                mob instanceof EnderDragon ||
+                mob instanceof Guardian;
+
+        if (!isIndirectOrSpecial) return originalDamage;
+        float damageFactor = mob.getData(ModAttachments.DIFFICULTY_MULTIPLIER);
+        if (mob instanceof Creeper)
+            damageFactor *= (float) ScalingDifficulty.CONFIG.creeperExplosionFactor;
+        if (damageFactor > 1.0f)
+            return originalDamage * damageFactor;
+
+        return originalDamage;
     }
 }

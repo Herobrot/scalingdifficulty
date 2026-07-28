@@ -3,6 +3,7 @@ package com.herobrot.scalingdifficulty;
 import com.herobrot.scalingdifficulty.config.ConfigInit;
 import com.herobrot.scalingdifficulty.config.ScalingDifficultyConfig;
 import com.herobrot.scalingdifficulty.data.ModAttachments;
+import com.herobrot.scalingdifficulty.events.ClientEvents;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.ModList;
@@ -26,7 +27,7 @@ public class ScalingDifficulty {
         isLevelplateLoaded = ModList.get().isLoaded("levelplate");
 
         if (FMLEnvironment.dist.isClient()) {
-            com.herobrot.scalingdifficulty.events.ClientEvents.registerConfigScreen(modContainer);
+            ClientEvents.registerConfigScreen(modContainer);
         }
         LOGGER.info("ScalingDifficulty Core Initialized!");
     }
