@@ -21,7 +21,7 @@ import net.minecraft.world.level.storage.loot.LootTable;
 
 public class DifficultyCalculator {
 
-    private static final long TICKS_PER_MINUTE = 1200L;
+    public static final long TICKS_PER_MINUTE = 1200L;
 
     public static float calculateRawMultiplier(ServerLevel level, BlockPos pos, boolean isBoss) {
         ScalingDifficultyConfig config = ScalingDifficulty.CONFIG;
