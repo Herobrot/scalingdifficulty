@@ -1,3 +1,13 @@
+# 1.0.2
+## Added:
+- Added devMode config
+## Fixed:
+- Fixed Non-stackable items ([#1](https://github.com/Herobrot/scalingdifficulty/issues/1))
+## Changed:
+- Refactor code for better readability
+- Optimize a bit the code
+- The command "/sddiag" now appears only if devMode is `true`
+---
 # 1.0.1
 ## Added:
 - Levelplate compat
