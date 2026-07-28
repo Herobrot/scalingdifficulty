@@ -1,6 +1,7 @@
 package com.herobrot.scalingdifficulty.api;
 
 import com.herobrot.scalingdifficulty.ScalingDifficulty;
+import com.herobrot.scalingdifficulty.compat.LevelplateCompat;
 import com.herobrot.scalingdifficulty.config.ScalingDifficultyConfig;
 import com.herobrot.scalingdifficulty.data.DimensionDifficultyLoader;
 import com.herobrot.scalingdifficulty.data.DimensionSettings;
@@ -15,8 +16,13 @@ import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.monster.Zombie;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.storage.loot.LootParams;
+import net.minecraft.world.level.storage.loot.LootTable;
 
 public class DifficultyCalculator {
+
+    private static final long TICKS_PER_MINUTE = 1200L;
+
     public static float calculateRawMultiplier(ServerLevel level, BlockPos pos, boolean isBoss) {
         ScalingDifficultyConfig config = ScalingDifficulty.CONFIG;
         String dimensionKey = level.dimension().location().toString();
@@ -31,6 +37,7 @@ public class DifficultyCalculator {
         float worldSpawnDistance = Mth.sqrt((float) pos.distToCenterSqr(spawnX, pos.getY(), spawnZ));
         long worldTime = level.getDayTime();
         int spawnHeight = pos.getY();
+
         if (settings.increasingDistance != 0) {
             float distance = worldSpawnDistance - settings.startingDistance;
             if (distance > 0) {
@@ -39,10 +46,10 @@ public class DifficultyCalculator {
             }
         }
         if (settings.increasingTime != 0) {
-            long time = worldTime - (settings.startingTime * 1200L);
+            long time = worldTime - (settings.startingTime * TICKS_PER_MINUTE);
             if (time > 0) {
                 if (!isBoss && config.excludeTimeInOtherDimension && level.dimension() != Level.OVERWORLD) time = 0;
-                factor += ((int) (time / (settings.increasingTime * 1200L))) * (isBoss ? config.bossTimeFactor : settings.timeFactor);
+                factor += ((int) (time / (settings.increasingTime * TICKS_PER_MINUTE))) * (isBoss ? config.bossTimeFactor : settings.timeFactor);
             }
         }
         if (!isBoss && settings.heightDistance != 0) {
@@ -68,6 +75,7 @@ public class DifficultyCalculator {
         DimensionSettings settings = DimensionDifficultyLoader.getSettings(level.dimension().location().toString());
 
         float rawMultiplier = calculateRawMultiplier(level, mob.blockPosition(), isBoss);
+
         if (isBoss && config.dynamicBossModification) {
             int playersNearby = 0;
             double radiusSqr = config.bossDistance * config.bossDistance;
@@ -80,6 +88,7 @@ public class DifficultyCalculator {
                 rawMultiplier += (float) ((playersNearby - 1) * config.dynamicBossModificator);
             }
         }
+
         double mobHealthFactor = Math.min(rawMultiplier, isBoss ? config.bossMaxFactor : settings.maxFactorHealth);
         double mobDamageFactor = Math.min(rawMultiplier, settings.maxFactorDamage);
         double mobProtectionFactor = Math.min(rawMultiplier, settings.maxFactorProtection);
@@ -91,37 +100,64 @@ public class DifficultyCalculator {
             mobHealthFactor *= randomModifier;
             mobDamageFactor *= randomModifier;
         }
+
         mobHealthFactor = Math.round(mobHealthFactor * 100.0) / 100.0;
         mobDamageFactor = Math.round(mobDamageFactor * 100.0) / 100.0;
         mobProtectionFactor = Math.round(mobProtectionFactor * 100.0) / 100.0;
 
         mob.setData(ModAttachments.DIFFICULTY_MULTIPLIER, (float) mobHealthFactor);
+
         if (config.allowSpecialZombie && !mob.isBaby() && mob instanceof Zombie) {
-            if (level.random.nextFloat() < (config.speedZombieChance / 100f)) {
-                mobHealthFactor -= (config.speedZombieMalusLifePoints / mob.getAttributeBaseValue(Attributes.MAX_HEALTH));
-                mobSpeedFactor *= config.speedZombieSpeedFactor;
-                mobSpeedFactor = Math.min(mobSpeedFactor, settings.maxFactorSpeed);
-                mob.setData(ModAttachments.SPEEDY_ZOMBIE, true);
-                AttributeHandler.applyModifier(mob, Attributes.SCALE, AttributeHandler.SCALE_MOD_ID, 0.85);
-            } else if (level.random.nextFloat() < (config.bigZombieChance / 100f)) {
-                mobSpeedFactor *= config.bigZombieSlownessFactor;
-                double healthBonusFactor = config.bigZombieBonusLifePoints / mob.getAttributeBaseValue(Attributes.MAX_HEALTH);
-                double damageBonusFactor = config.bigZombieBonusDamage / mob.getAttributeBaseValue(Attributes.ATTACK_DAMAGE);
-                mobHealthFactor += healthBonusFactor;
-                mobDamageFactor += damageBonusFactor;
-                mob.setData(ModAttachments.BIG_ZOMBIE, true);
-                AttributeHandler.applyModifier(mob, Attributes.SCALE, AttributeHandler.SCALE_MOD_ID, config.bigZombieSize);
+            double baseHealth = mob.getAttributeBaseValue(Attributes.MAX_HEALTH);
+            // Guardia para prevenir división por cero o valores nulos
+            if (baseHealth > 0) {
+                if (level.random.nextFloat() < (config.speedZombieChance / 100f)) {
+                    mobHealthFactor -= (config.speedZombieMalusLifePoints / baseHealth);
+                    mobSpeedFactor *= config.speedZombieSpeedFactor;
+                    mobSpeedFactor = Math.min(mobSpeedFactor, settings.maxFactorSpeed);
+                    mob.setData(ModAttachments.SPEEDY_ZOMBIE, true);
+                    AttributeHandler.applyModifier(mob, Attributes.SCALE, AttributeHandler.SCALE_MOD_ID, 0.85);
+                } else if (level.random.nextFloat() < (config.bigZombieChance / 100f)) {
+                    mobSpeedFactor *= config.bigZombieSlownessFactor;
+                    double healthBonusFactor = config.bigZombieBonusLifePoints / baseHealth;
+                    double baseDamage = mob.getAttributeBaseValue(Attributes.ATTACK_DAMAGE);
+                    double damageBonusFactor = baseDamage > 0 ? (config.bigZombieBonusDamage / baseDamage) : 0.0;
+
+                    mobHealthFactor += healthBonusFactor;
+                    mobDamageFactor += damageBonusFactor;
+                    mob.setData(ModAttachments.BIG_ZOMBIE, true);
+                    AttributeHandler.applyModifier(mob, Attributes.SCALE, AttributeHandler.SCALE_MOD_ID, config.bigZombieSize);
+                }
             }
         }
+
         AttributeHandler.applyModifier(mob, Attributes.MAX_HEALTH, AttributeHandler.HEALTH_MOD_ID, mobHealthFactor);
-        if (mob.getAttributes().hasAttribute(Attributes.ATTACK_DAMAGE)) {
-            AttributeHandler.applyModifier(mob, Attributes.ATTACK_DAMAGE, AttributeHandler.DAMAGE_MOD_ID, mobDamageFactor);
+        AttributeHandler.applyModifier(mob, Attributes.ATTACK_DAMAGE, AttributeHandler.DAMAGE_MOD_ID, mobDamageFactor);
+        AttributeHandler.applyModifier(mob, Attributes.ARMOR, AttributeHandler.ARMOR_MOD_ID, mobProtectionFactor);
+        AttributeHandler.applyModifier(mob, Attributes.MOVEMENT_SPEED, AttributeHandler.SPEED_MOD_ID, mobSpeedFactor);
+    }
+
+    @SuppressWarnings("resource")
+    public static void dropMoreLoot(Mob mob, LootTable lootTable, LootParams lootParams) {
+        if (!ScalingDifficulty.CONFIG.dropMoreLoot) return;
+        float multiplier;
+        if (ScalingDifficulty.isLevelplateLoaded) {
+            int mobLevel = LevelplateCompat.getMobLevel(mob);
+            if (mobLevel <= 1) return;
+            multiplier = mobLevel;
+        } else {
+            multiplier = mob.getData(ModAttachments.DIFFICULTY_MULTIPLIER);
+            if (multiplier <= 1.0f) return;
         }
-        if (mob.getAttributes().hasAttribute(Attributes.ARMOR)) {
-            AttributeHandler.applyModifier(mob, Attributes.ARMOR, AttributeHandler.ARMOR_MOD_ID, mobProtectionFactor);
-        }
-        if (mob.getAttributes().hasAttribute(Attributes.MOVEMENT_SPEED)) {
-            AttributeHandler.applyModifier(mob, Attributes.MOVEMENT_SPEED, AttributeHandler.SPEED_MOD_ID, mobSpeedFactor);
+        float dropChance = multiplier * ScalingDifficulty.CONFIG.moreLootChance;
+        dropChance = Math.min(dropChance, ScalingDifficulty.CONFIG.maxLootChance);
+
+        if (mob.level().random.nextFloat() <= dropChance) {
+            lootTable.getRandomItems(lootParams, mob.getLootTableSeed(), stack -> {
+                if (!stack.isEmpty() && mob.level().random.nextFloat() <= ScalingDifficulty.CONFIG.chanceForEachItem) {
+                    mob.spawnAtLocation(stack);
+                }
+            });
         }
     }
 }

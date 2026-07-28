@@ -3,6 +3,7 @@
   "package": "com.herobrot.scalingdifficulty.mixin",
   "compatibilityLevel": "JAVA_21",
   "mixins": [
+    "LivingEntityMixin",
     "WolfEntityMixin"
   ],
   "injectors": {
