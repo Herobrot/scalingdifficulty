@@ -160,4 +160,20 @@ public class DifficultyCalculator {
             });
         }
     }
+
+    public static float calculateDropChance(Mob mob) {
+        float multiplier;
+
+        if (ScalingDifficulty.isLevelplateLoaded) {
+            int mobLevel = LevelplateCompat.getMobLevel(mob);
+            if (mobLevel <= 1) return 0.0f;
+            multiplier = mobLevel;
+        } else {
+            multiplier = mob.getData(ModAttachments.DIFFICULTY_MULTIPLIER);
+            if (multiplier <= 1.0f) return 0.0f;
+        }
+
+        float dropChance = multiplier * ScalingDifficulty.CONFIG.moreLootChance;
+        return Math.min(dropChance, ScalingDifficulty.CONFIG.maxLootChance);
+    }
 }

@@ -1,12 +1,17 @@
 package com.herobrot.scalingdifficulty.commands;
 
 import com.herobrot.scalingdifficulty.ScalingDifficulty;
+import com.herobrot.scalingdifficulty.api.DifficultyCalculator;
 import com.herobrot.scalingdifficulty.compat.LevelplateCompat;
 import com.herobrot.scalingdifficulty.data.ModAttachments;
 import com.mojang.brigadier.CommandDispatcher;
+import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.projectile.ProjectileUtil;
@@ -20,7 +25,6 @@ public class DiagnosticCommand {
                 .requires(source -> source.hasPermission(2))
                 .executes(ctx -> {
                     if (!(ctx.getSource().getEntity() instanceof ServerPlayer player)) return 0;
-
                     double range = 10.0;
                     Vec3 start = player.getEyePosition();
                     Vec3 direction = player.getViewVector(1.0f);
@@ -33,45 +37,65 @@ public class DiagnosticCommand {
                     );
 
                     if (entityHit == null || !(entityHit.getEntity() instanceof Mob mob)) {
-                        ctx.getSource().sendFailure(Component.literal("Apunta a un mob (máx. 10 bloques)"));
+                        ctx.getSource().sendFailure(Component.literal("Apunta a un mob (máx. 10 bloques)")
+                                .withStyle(ChatFormatting.RED));
                         return 0;
                     }
 
                     float multiplier = mob.getData(ModAttachments.DIFFICULTY_MULTIPLIER);
                     boolean isBigZombie = mob.getData(ModAttachments.BIG_ZOMBIE);
                     boolean isSpeedyZombie = mob.getData(ModAttachments.SPEEDY_ZOMBIE);
+                    ResourceLocation mobId = BuiltInRegistries.ENTITY_TYPE.getKey(mob.getType());
+                    float dropChance = DifficultyCalculator.calculateDropChance(mob);
+                    int level = ScalingDifficulty.isLevelplateLoaded ? LevelplateCompat.getMobLevel(mob) : 1;
 
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("=== ScalingDifficulty Diagnóstico ===\n");
-                    sb.append("Mob: ").append(mob.getType().toShortString()).append("\n");
-                    sb.append("DIFFICULTY_MULTIPLIER: ").append(multiplier).append("\n");
-                    sb.append("Big Zombie: ").append(isBigZombie).append("\n");
-                    sb.append("Speedy Zombie: ").append(isSpeedyZombie).append("\n");
-                    sb.append("Vida actual: ").append(mob.getHealth())
-                            .append(" / ").append(mob.getMaxHealth()).append("\n");
+                    MutableComponent message = Component.literal("=== ScalingDifficulty ===\n")
+                            .withStyle(ChatFormatting.AQUA, ChatFormatting.BOLD);
+
+                    message.append(formatLine("Mob: ", mobId.toString()));
+                    message.append(formatLine("Multiplier (Data): ", String.valueOf(multiplier)));
+
+                    if (isBigZombie)
+                        message.append(formatLine("Big Zombie: "));
+                    if (isSpeedyZombie)
+                        message.append(formatLine("Speedy Zombie: "));
+
+                    message.append(formatLineHealth(mob.getHealth(), mob.getMaxHealth()));
+                    message.append(Component.literal("--- Loot Info ---\n").withStyle(ChatFormatting.YELLOW));
 
                     if (ScalingDifficulty.isLevelplateLoaded) {
-                        int level = LevelplateCompat.getMobLevel(mob);
-                        float dropChance = Math.min(level * ScalingDifficulty.CONFIG.moreLootChance,
-                                ScalingDifficulty.CONFIG.maxLootChance);
-                        sb.append("--- Levelplate ---\n");
-                        sb.append("Nivel calculado: ").append(level).append("\n");
-                        sb.append("Drop chance: ").append(String.format("%.2f%%", dropChance * 100)).append("\n");
+                        message.append(formatLine("Mod Levelplate: "));
+                        message.append(formatLine("Nivel (Levelplate): ", String.valueOf(level)));
                     } else {
-                        int simulatedLevel = (int) (10 * multiplier - 10);
-                        if (simulatedLevel < 1) simulatedLevel = 1;
-
-                        float dropChance = Math.min(simulatedLevel * ScalingDifficulty.CONFIG.moreLootChance,
-                                ScalingDifficulty.CONFIG.maxLootChance);
-                        sb.append("--- Sin Levelplate ---\n");
-                        sb.append("Nivel Simulado: ").append(simulatedLevel).append("\n");
-                        sb.append("Drop chance: ")
-                                .append(String.format("%.2f%%", dropChance * 100)).append("\n");
+                        int simulatedLevel = Math.max(1, (int) (10 * multiplier - 10));
+                        message.append(formatLine("Nivel Simulado: ", String.valueOf(simulatedLevel)));
                     }
-
-                    ctx.getSource().sendSuccess(() -> Component.literal(sb.toString()), false);
+                    message.append(formatLine("Drop chance: ", String.format("%.2f%%", dropChance * 100), ChatFormatting.YELLOW));
+                    ctx.getSource().sendSuccess(() -> message, false);
                     return 1;
                 })
         );
+    }
+
+    private static Component formatLine(String label, String value) {
+        return formatLine(label, value, ChatFormatting.WHITE);
+    }
+
+    private static Component formatLine(String label) {
+        ChatFormatting color = ChatFormatting.GREEN;
+        return Component.literal(label).withStyle(ChatFormatting.GRAY)
+                .append(Component.literal(true + "\n").withStyle(color));
+    }
+
+    private static Component formatLine(String label, String value, ChatFormatting color) {
+        return Component.literal(label).withStyle(ChatFormatting.GRAY)
+                .append(Component.literal(value + "\n").withStyle(color));
+    }
+
+    private static Component formatLineHealth(float health, float maxHealth) {
+        return Component.literal("Vida actual: ").withStyle(ChatFormatting.GRAY)
+                .append(Component.literal(String.valueOf(health)).withStyle(ChatFormatting.RED))
+                .append(Component.literal("/").withStyle(ChatFormatting.GRAY))
+                .append(Component.literal(maxHealth + "\n").withStyle(ChatFormatting.DARK_RED));
     }
 }

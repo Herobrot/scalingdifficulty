@@ -16,6 +16,7 @@ public class ServerEvents {
     }
     @SubscribeEvent
     public static void onRegisterCommands(RegisterCommandsEvent event) {
-        DiagnosticCommand.register(event.getDispatcher());
+        if (ScalingDifficulty.CONFIG.devMode)
+            DiagnosticCommand.register(event.getDispatcher());
     }
 }

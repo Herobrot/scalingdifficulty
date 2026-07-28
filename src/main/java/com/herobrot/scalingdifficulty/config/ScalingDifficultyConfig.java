@@ -6,6 +6,7 @@ import java.util.List;
 import me.shedaniel.autoconfig.ConfigData;
 import me.shedaniel.autoconfig.annotation.ConfigEntry;
 import me.shedaniel.autoconfig.annotation.Config;
+import me.shedaniel.cloth.clothconfig.shadowed.blue.endless.jankson.Comment;
 
 @Config(name = "scalingdifficulty")
 @Config.Gui.Background("minecraft:textures/block/stone.png")
@@ -78,6 +79,10 @@ public class ScalingDifficultyConfig implements ConfigData {
 
     @ConfigEntry.Gui.Tooltip
     public boolean hudTesting = false;
+
+    @Comment("Solo para uso del desarrollador.\nActiva el commando /sddiag")
+    @ConfigEntry.Gui.RequiresRestart
+    public boolean devMode = false;
 
     @ConfigEntry.Gui.Tooltip
     public ArrayList<String> excludedEntity = new ArrayList<>(List.of("the_bumblezone:cosmic_crystal_entity"));

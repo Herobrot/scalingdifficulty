@@ -62,6 +62,7 @@
 
   "text.autoconfig.scalingdifficulty.option.hudTesting": "HUD Testing",
   "text.autoconfig.scalingdifficulty.option.hudTesting.@Tooltip": "Dev feature. Shows difficulty multipliers on screen when aiming at a mob",
+  "text.autoconfig.scalingdifficulty.option.devMode": "Dev Mode",
 
   "text.autoconfig.scalingdifficulty.category.monster_setting": "Monster Settings",
 
