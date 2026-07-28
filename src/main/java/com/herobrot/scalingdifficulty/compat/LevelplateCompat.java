@@ -13,13 +13,10 @@ import net.minecraft.world.entity.ai.attributes.DefaultAttributes;
 public class LevelplateCompat {
     public static int getMobLevel(Mob mob) {
         LevelplateAttachments.MobLevelData data = mob.getData(LevelplateAttachments.MOB_DATA);
-
-        if (data.level > 1) {
+        if (data.level > 1)
             return data.level;
-        }
 
         int levelMultiplier = Levelplate.CONFIG.levelMultiplier;
-
         if (Levelplate.CONFIG.useScalingDifficultyLvl) {
             float multiplier = mob.getData(ModAttachments.DIFFICULTY_MULTIPLIER);
             if (multiplier <= 0.0f) multiplier = 1.0f;
@@ -37,9 +34,10 @@ public class LevelplateCompat {
                 return Math.max(level, 1);
             }
         }
-
         return 1;
     }
+
+    // Aprovechamiento para el mod Levelplate. No-op
     public static int getLevelFromMultiplier(float multiplier) {
         int levelMultiplier = Levelplate.CONFIG.levelMultiplier;
         if (multiplier <= 0.0f) multiplier = 1.0f;
