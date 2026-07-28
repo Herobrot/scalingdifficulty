@@ -3,6 +3,7 @@ package com.herobrot.scalingdifficulty.data;
 import com.google.gson.JsonObject;
 import com.herobrot.scalingdifficulty.ScalingDifficulty;
 import com.herobrot.scalingdifficulty.config.ScalingDifficultyConfig;
+import net.minecraft.util.GsonHelper;
 
 public class DimensionSettings {
     public final Integer distanceCoordinatesX;
@@ -26,29 +27,23 @@ public class DimensionSettings {
 
     public DimensionSettings(JsonObject data) {
         ScalingDifficultyConfig c = ScalingDifficulty.CONFIG;
-
         this.distanceCoordinatesX = data.has("distanceCoordinatesX") ? data.get("distanceCoordinatesX").getAsInt() : null;
         this.distanceCoordinatesZ = data.has("distanceCoordinatesZ") ? data.get("distanceCoordinatesZ").getAsInt() : null;
-        this.increasingDistance = data.has("increasingDistance") ? data.get("increasingDistance").getAsInt() : c.increasingDistance;
-        this.distanceFactor = data.has("distanceFactor") ? data.get("distanceFactor").getAsDouble() : c.distanceFactor;
-
-        this.increasingTime = data.has("increasingTime") ? data.get("increasingTime").getAsInt() : c.increasingTime;
-        this.timeFactor = data.has("timeFactor") ? data.get("timeFactor").getAsDouble() : c.timeFactor;
-
-        this.heightDistance = data.has("heightDistance") ? data.get("heightDistance").getAsInt() : c.heightDistance;
-        this.heightFactor = data.has("heightFactor") ? data.get("heightFactor").getAsDouble() : c.heightFactor;
-
-        this.maxFactorHealth = data.has("maxFactorHealth") ? data.get("maxFactorHealth").getAsDouble() : c.maxFactorHealth;
-        this.maxFactorDamage = data.has("maxFactorDamage") ? data.get("maxFactorDamage").getAsDouble() : c.maxFactorDamage;
-        this.maxFactorProtection = data.has("maxFactorProtection") ? data.get("maxFactorProtection").getAsDouble() : c.maxFactorProtection;
-        this.maxFactorSpeed = data.has("maxFactorSpeed") ? data.get("maxFactorSpeed").getAsDouble() : c.maxFactorSpeed;
-
-        this.startingFactor = data.has("startingFactor") ? data.get("startingFactor").getAsDouble() : c.startingFactor;
-        this.startingDistance = data.has("startingDistance") ? data.get("startingDistance").getAsInt() : c.startingDistance;
-        this.startingTime = data.has("startingTime") ? data.get("startingTime").getAsInt() : c.startingTime;
-        this.startingHeight = data.has("startingHeight") ? data.get("startingHeight").getAsInt() : c.startingHeight;
-
-        this.positiveHeightIncrement = data.has("positiveHeightIncrement") ? data.get("positiveHeightIncrement").getAsBoolean() : c.positiveHeightIncrement;
-        this.negativeHeightIncrement = data.has("negativeHeightIncrement") ? data.get("negativeHeightIncrement").getAsBoolean() : c.negativeHeightIncrement;
+        this.increasingDistance = GsonHelper.getAsInt(data, "increasingDistance", c.increasingDistance);
+        this.distanceFactor = GsonHelper.getAsDouble(data, "distanceFactor", c.distanceFactor);
+        this.increasingTime = GsonHelper.getAsInt(data, "increasingTime", c.increasingTime);
+        this.timeFactor = GsonHelper.getAsDouble(data, "timeFactor", c.timeFactor);
+        this.heightDistance = GsonHelper.getAsInt(data, "heightDistance", c.heightDistance);
+        this.heightFactor = GsonHelper.getAsDouble(data, "heightFactor", c.heightFactor);
+        this.maxFactorHealth = GsonHelper.getAsDouble(data, "maxFactorHealth", c.maxFactorHealth);
+        this.maxFactorDamage = GsonHelper.getAsDouble(data, "maxFactorDamage", c.maxFactorDamage);
+        this.maxFactorProtection = GsonHelper.getAsDouble(data, "maxFactorProtection", c.maxFactorProtection);
+        this.maxFactorSpeed = GsonHelper.getAsDouble(data, "maxFactorSpeed", c.maxFactorSpeed);
+        this.startingFactor = GsonHelper.getAsDouble(data, "startingFactor", c.startingFactor);
+        this.startingDistance = GsonHelper.getAsInt(data, "startingDistance", c.startingDistance);
+        this.startingTime = GsonHelper.getAsInt(data, "startingTime", c.startingTime);
+        this.startingHeight = GsonHelper.getAsInt(data, "startingHeight", c.startingHeight);
+        this.positiveHeightIncrement = GsonHelper.getAsBoolean(data, "positiveHeightIncrement", c.positiveHeightIncrement);
+        this.negativeHeightIncrement = GsonHelper.getAsBoolean(data, "negativeHeightIncrement", c.negativeHeightIncrement);
     }
 }
