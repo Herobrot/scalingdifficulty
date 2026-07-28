@@ -25,9 +25,6 @@ public class ScalingDifficultyConfig implements ConfigData {
     public int heightDistance = 30;
     @ConfigEntry.Gui.Tooltip
     public double heightFactor = 0.1D;
-    
-    
-    
 
     @ConfigEntry.Gui.Tooltip
     public double maxFactorHealth = 3.0D;
