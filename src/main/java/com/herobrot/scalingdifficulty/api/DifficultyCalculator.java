@@ -33,17 +33,13 @@ public class DifficultyCalculator {
         ScalingDifficultyConfig config = ScalingDifficulty.CONFIG;
         String dimensionKey = level.dimension().location().toString();
         DimensionSettings settings = DimensionDifficultyLoader.getSettings(dimensionKey);
-
         double factor = settings.startingFactor;
-
         BlockPos spawnPos = level.getSharedSpawnPos();
         int spawnX = settings.distanceCoordinatesX != null ? settings.distanceCoordinatesX : spawnPos.getX();
         int spawnZ = settings.distanceCoordinatesZ != null ? settings.distanceCoordinatesZ : spawnPos.getZ();
-
         float worldSpawnDistance = Mth.sqrt((float) pos.distToCenterSqr(spawnX, pos.getY(), spawnZ));
         long worldTime = level.getDayTime();
         int spawnHeight = pos.getY();
-
         if (settings.increasingDistance != 0) {
             float distance = worldSpawnDistance - settings.startingDistance;
             if (distance > 0) {
@@ -70,18 +66,13 @@ public class DifficultyCalculator {
 
     public static void applyScaling(Mob mob, ServerLevel level) {
         ScalingDifficultyConfig config = ScalingDifficulty.CONFIG;
-
         String entityName = BuiltInRegistries.ENTITY_TYPE.getKey(mob.getType()).toString();
         if (config.excludedEntity.contains(entityName)) return;
-
         boolean isBoss = mob.getType().is(EntityTags.BOSSES);
         if (isBoss && !config.affectBosses) return;
         if (mob.isBaby() && !config.affectAnimalBabies) return;
-
         DimensionSettings settings = DimensionDifficultyLoader.getSettings(level.dimension().location().toString());
-
         float rawMultiplier = calculateRawMultiplier(level, mob.blockPosition(), isBoss);
-
         if (isBoss && config.dynamicBossModification) {
             int playersNearby = 0;
             double radiusSqr = config.bossDistance * config.bossDistance;
@@ -94,19 +85,16 @@ public class DifficultyCalculator {
                 rawMultiplier += (float) ((playersNearby - 1) * config.dynamicBossModificator);
             }
         }
-
         double mobHealthFactor = Math.min(rawMultiplier, isBoss ? config.bossMaxFactor : settings.maxFactorHealth);
         double mobDamageFactor = Math.min(rawMultiplier, settings.maxFactorDamage);
         double mobProtectionFactor = Math.min(rawMultiplier, settings.maxFactorProtection);
         double mobSpeedFactor = 1.0D;
-
         if (config.allowRandomValues && level.random.nextFloat() <= (config.randomChance / 100f)) {
             float rFactor = config.randomFactor / 100f;
             double randomModifier = 1.0 - rFactor + (level.random.nextDouble() * rFactor * 2f);
             mobHealthFactor *= randomModifier;
             mobDamageFactor *= randomModifier;
         }
-
         mobHealthFactor = Math.round(mobHealthFactor * 100.0) / 100.0;
         mobDamageFactor = Math.round(mobDamageFactor * 100.0) / 100.0;
         mobProtectionFactor = Math.round(mobProtectionFactor * 100.0) / 100.0;
@@ -115,7 +103,6 @@ public class DifficultyCalculator {
 
         if (config.allowSpecialZombie && !mob.isBaby() && mob instanceof Zombie) {
             double baseHealth = mob.getAttributeBaseValue(Attributes.MAX_HEALTH);
-            // Guardia para prevenir división por cero o valores nulos
             if (baseHealth > 0) {
                 if (level.random.nextFloat() < (config.speedZombieChance / 100f)) {
                     mobHealthFactor -= (config.speedZombieMalusLifePoints / baseHealth);
@@ -128,7 +115,6 @@ public class DifficultyCalculator {
                     double healthBonusFactor = config.bigZombieBonusLifePoints / baseHealth;
                     double baseDamage = mob.getAttributeBaseValue(Attributes.ATTACK_DAMAGE);
                     double damageBonusFactor = baseDamage > 0 ? (config.bigZombieBonusDamage / baseDamage) : 0.0;
-
                     mobHealthFactor += healthBonusFactor;
                     mobDamageFactor += damageBonusFactor;
                     mob.setData(ModAttachments.BIG_ZOMBIE, true);
@@ -136,7 +122,6 @@ public class DifficultyCalculator {
                 }
             }
         }
-
         AttributeHandler.applyModifier(mob, Attributes.MAX_HEALTH, AttributeHandler.HEALTH_MOD_ID, mobHealthFactor);
         AttributeHandler.applyModifier(mob, Attributes.ATTACK_DAMAGE, AttributeHandler.DAMAGE_MOD_ID, mobDamageFactor);
         AttributeHandler.applyModifier(mob, Attributes.ARMOR, AttributeHandler.ARMOR_MOD_ID, mobProtectionFactor);
@@ -155,21 +140,23 @@ public class DifficultyCalculator {
             multiplier = mob.getData(ModAttachments.DIFFICULTY_MULTIPLIER);
             if (multiplier <= 1.0f) return;
         }
-        float dropChance = multiplier * ScalingDifficulty.CONFIG.moreLootChance;
-        dropChance = Math.min(dropChance, ScalingDifficulty.CONFIG.maxLootChance);
-
-        if (mob.level().random.nextFloat() <= dropChance) {
+        float targetRolls = (multiplier - 1.0f) * ScalingDifficulty.CONFIG.lootRollsFactor;
+        float effectiveRolls = Math.min(targetRolls, ScalingDifficulty.CONFIG.maxRollsPerDeath);
+        int guaranteedRolls = (int) Math.floor(effectiveRolls);
+        float fractionalRoll = effectiveRolls - guaranteedRolls;
+        int totalExtraRolls = guaranteedRolls;
+        if (fractionalRoll > 0 && mob.level().random.nextFloat() < fractionalRoll)
+            totalExtraRolls++;
+        for (int i = 0; i < totalExtraRolls; i++) {
             lootTable.getRandomItems(lootParams, mob.getLootTableSeed(), stack -> {
-                if (!stack.isEmpty() && mob.level().random.nextFloat() <= ScalingDifficulty.CONFIG.chanceForEachItem) {
+                if (!stack.isEmpty())
                     mob.spawnAtLocation(stack);
-                }
             });
         }
     }
 
-    public static float calculateDropChance(Mob mob) {
+    public static float calculateExtraRolls(Mob mob) {
         float multiplier;
-
         if (ScalingDifficulty.isLevelplateLoaded) {
             int mobLevel = LevelplateCompat.getMobLevel(mob);
             if (mobLevel <= 1) return 0.0f;
@@ -178,9 +165,8 @@ public class DifficultyCalculator {
             multiplier = mob.getData(ModAttachments.DIFFICULTY_MULTIPLIER);
             if (multiplier <= 1.0f) return 0.0f;
         }
-
-        float dropChance = multiplier * ScalingDifficulty.CONFIG.moreLootChance;
-        return Math.min(dropChance, ScalingDifficulty.CONFIG.maxLootChance);
+        float targetRolls = (multiplier - 1.0f) * ScalingDifficulty.CONFIG.lootRollsFactor;
+        return Math.min(targetRolls, ScalingDifficulty.CONFIG.maxRollsPerDeath);
     }
 
     public static int scaleExperience(Mob mob, int originalXp) {
@@ -195,7 +181,6 @@ public class DifficultyCalculator {
 
     public static float scaleDamage(Mob mob, float originalDamage, DamageSource source) {
         Entity directEntity = source.getDirectEntity();
-
         boolean isIndirectOrSpecial = directEntity != mob ||
                 source.is(DamageTypeTags.IS_PROJECTILE) ||
                 source.is(DamageTypeTags.IS_EXPLOSION) ||

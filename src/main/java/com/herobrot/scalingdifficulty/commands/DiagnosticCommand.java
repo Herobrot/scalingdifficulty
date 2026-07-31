@@ -46,7 +46,7 @@ public class DiagnosticCommand {
                     boolean isBigZombie = mob.getData(ModAttachments.BIG_ZOMBIE);
                     boolean isSpeedyZombie = mob.getData(ModAttachments.SPEEDY_ZOMBIE);
                     ResourceLocation mobId = BuiltInRegistries.ENTITY_TYPE.getKey(mob.getType());
-                    float dropChance = DifficultyCalculator.calculateDropChance(mob);
+                    float extraRolls = DifficultyCalculator.calculateExtraRolls(mob);
                     int level = ScalingDifficulty.isLevelplateLoaded ? LevelplateCompat.getMobLevel(mob) : 1;
 
                     MutableComponent message = Component.literal("=== ScalingDifficulty ===\n")
@@ -70,7 +70,7 @@ public class DiagnosticCommand {
                         int simulatedLevel = Math.max(1, (int) (10 * multiplier - 10));
                         message.append(formatLine("Nivel Simulado: ", String.valueOf(simulatedLevel)));
                     }
-                    message.append(formatLine("Drop chance: ", String.format("%.2f%%", dropChance * 100), ChatFormatting.YELLOW));
+                    message.append(formatLine("Extra Loot Rolls: ", String.format("%.2fx", extraRolls), ChatFormatting.YELLOW));
                     ctx.getSource().sendSuccess(() -> message, false);
                     return 1;
                 })

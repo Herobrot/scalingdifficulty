@@ -66,10 +66,8 @@ public class ScalingDifficultyConfig implements ConfigData {
     @ConfigEntry.Gui.Tooltip
     public boolean dropMoreLoot = true;
     @ConfigEntry.Gui.Tooltip
-    public float moreLootChance = 0.02F;
-    public float maxLootChance = 0.7F;
-    @ConfigEntry.Gui.Tooltip
-    public float chanceForEachItem = 0.5F;
+    public float lootRollsFactor = 1.0F;
+    public float maxRollsPerDeath = 3.0F;
 
     //TODO until LevelZ is ported
     @ConfigEntry.Gui.Tooltip
