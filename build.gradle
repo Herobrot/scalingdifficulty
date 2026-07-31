@@ -153,7 +153,7 @@ publishMods {
         requires("cloth-config")
         optional("levelplate")
         changelogType = "markdown"
-        displayName = jar.archiveFileName.get()
+        displayName = "${jar.archiveFileName.get()}+${minecraft_version}"
     }
     modrinth {
         accessToken = providers.environmentVariable("MODRINTH_TOKEN")
@@ -161,6 +161,7 @@ publishMods {
         minecraftVersions.add(minecraft_version)
         requires("cloth-config")
         environment = SERVER_ONLY_CLIENT_OPTIONAL
+        version = "${mod_version}+${minecraft_version}"
     }
     github {
         accessToken = providers.environmentVariable("GITHUB_TOKEN")
