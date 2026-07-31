@@ -165,7 +165,7 @@ publishMods {
     github {
         accessToken = providers.environmentVariable("GITHUB_TOKEN")
         repository = "Herobrot/${mod_id}"
-        tagName="${mod_id}+${minecraft_version}"
+        tagName="${mod_version}+${minecraft_version}"
         displayName = "${mod_name} ${mod_version}+${minecraft_version}"
         commitish = "1.21"
         additionalFiles.from(tasks.named("sourcesJar"))
