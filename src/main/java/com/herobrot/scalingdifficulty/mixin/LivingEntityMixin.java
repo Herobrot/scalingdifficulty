@@ -23,9 +23,7 @@ public abstract class LivingEntityMixin {
     private void heroslib$dropMoreLoot(DamageSource damageSource, boolean hitByPlayer, CallbackInfo ci,
                                        ResourceKey<LootTable> resourcekey, LootTable loottable,
                                        LootParams.Builder builder, LootParams lootparams) {
-        ScalingDifficulty.LOGGER.info("[ScalingDifficulty]: Se disparó dropFromLootTable");
         if ((Object) this instanceof Mob mob) {
-            ScalingDifficulty.LOGGER.info("[ScalingDifficulty]: Un mob fue asesinado y su llave es: {}", resourcekey);
             DifficultyCalculator.dropMoreLoot(mob, loottable, lootparams);
         }
     }

@@ -1,3 +1,14 @@
+# 1.0.3
+## Added:
+- Rework of the extra loot
+## Fixed
+- Fixed loot where the loot doesn't increase ([#3](https://github.com/Herobrot/scalingdifficulty/issues/3))
+## Changed
+- Changed the config. Please change on your side (or delete the config before initializing the game)
+  - `chanceForEachItem` deleted
+  - `maxLootChance` -> `maxRollsPerDeath` Now works like a cap for extra loot on mobs drops
+  - `moreLootChance` -> `lootRollsFactor` The initial factor for extra loot. If 2.0 and `maxFactorHealth` is 3.0x, then you get 6 times loot on max level mob 
+--- 
 # 1.0.2
 ## Added:
 - Added devMode config
