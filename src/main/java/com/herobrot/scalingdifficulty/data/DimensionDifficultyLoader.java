@@ -20,9 +20,7 @@ public class DimensionDifficultyLoader extends SimpleJsonResourceReloadListener 
 
     private static DimensionSettings FALLBACK_SETTINGS;
 
-    public DimensionDifficultyLoader() {
-        super(GSON, "difficulty");
-    }
+    public DimensionDifficultyLoader() { super(GSON, "difficulty"); }
 
     @Override
     protected void apply(Map<ResourceLocation, JsonElement> jsonMap, @NotNull ResourceManager resourceManager, @NotNull ProfilerFiller profiler) {
@@ -35,18 +33,16 @@ public class DimensionDifficultyLoader extends SimpleJsonResourceReloadListener 
                 if (data.has("dimension")) {
                     String dimensionId = data.get("dimension").getAsString();
                     DIMENSIONS.put(dimensionId, new DimensionSettings(data));
-                    ScalingDifficulty.LOGGER.info("Loaded custom difficulty rules for dimension: {}", dimensionId);
+                    ScalingDifficulty.LOGGER.info("[Scaling Difficulty]: Loaded custom difficulty rules for dimension: {}", dimensionId);
                 }
             } catch (Exception e) {
-                ScalingDifficulty.LOGGER.error("Failed to parse dimension difficulty datapack from {}: {}", location, e.getMessage());
+                ScalingDifficulty.LOGGER.error("[Scaling Difficulty]: Failed to parse dimension difficulty datapack from {}: {}", location, e.getMessage());
             }
         });
     }
 
     public static DimensionSettings getSettings(String dimensionId) {
-        if (FALLBACK_SETTINGS == null) {
-            FALLBACK_SETTINGS = new DimensionSettings(new JsonObject());
-        }
+        if (FALLBACK_SETTINGS == null) FALLBACK_SETTINGS = new DimensionSettings(new JsonObject());
         return DIMENSIONS.getOrDefault(dimensionId, FALLBACK_SETTINGS);
     }
 }

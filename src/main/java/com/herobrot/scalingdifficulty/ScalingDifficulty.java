@@ -26,9 +26,6 @@ public class ScalingDifficulty {
 
         isLevelplateLoaded = ModList.get().isLoaded("levelplate");
 
-        if (FMLEnvironment.dist.isClient()) {
-            ClientEvents.registerConfigScreen(modContainer);
-        }
-        LOGGER.info("ScalingDifficulty Core Initialized!");
+        if (FMLEnvironment.dist.isClient()) ClientEvents.registerConfigScreen(modContainer);
     }
 }

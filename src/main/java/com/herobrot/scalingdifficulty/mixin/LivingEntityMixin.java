@@ -17,14 +17,8 @@ import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 @Mixin(LivingEntity.class)
 public abstract class LivingEntityMixin {
 
-    @Inject(method = "dropFromLootTable(Lnet/minecraft/world/damagesource/DamageSource;Z)V",
-            at = @At("TAIL"),
-            locals = LocalCapture.CAPTURE_FAILSOFT)
-    private void heroslib$dropMoreLoot(DamageSource damageSource, boolean hitByPlayer, CallbackInfo ci,
-                                       ResourceKey<LootTable> resourcekey, LootTable loottable,
-                                       LootParams.Builder builder, LootParams lootparams) {
-        if ((Object) this instanceof Mob mob) {
-            DifficultyCalculator.dropMoreLoot(mob, loottable, lootparams);
-        }
+    @Inject(method = "dropFromLootTable(Lnet/minecraft/world/damagesource/DamageSource;Z)V", at = @At("TAIL"), locals = LocalCapture.CAPTURE_FAILSOFT)
+    private void heroslib$dropMoreLoot(DamageSource damageSource, boolean hitByPlayer, CallbackInfo ci, ResourceKey<LootTable> resourcekey, LootTable loottable, LootParams.Builder builder, LootParams lootparams) {
+        if ((Object) this instanceof Mob mob) DifficultyCalculator.dropMoreLoot(mob, loottable, lootparams);
     }
 }

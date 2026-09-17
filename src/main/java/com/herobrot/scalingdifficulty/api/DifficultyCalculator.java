@@ -76,14 +76,10 @@ public class DifficultyCalculator {
         if (isBoss && config.dynamicBossModification) {
             int playersNearby = 0;
             double radiusSqr = config.bossDistance * config.bossDistance;
-            for (ServerPlayer player : level.players()) {
-                if (!player.isSpectator() && player.distanceToSqr(mob) <= radiusSqr) {
-                    playersNearby++;
-                }
-            }
-            if (playersNearby > 1) {
-                rawMultiplier += (float) ((playersNearby - 1) * config.dynamicBossModificator);
-            }
+            for (ServerPlayer player : level.players())
+                if (!player.isSpectator() && player.distanceToSqr(mob) <= radiusSqr) playersNearby++;
+
+            if (playersNearby > 1) rawMultiplier += (float) ((playersNearby - 1) * config.dynamicBossModificator);
         }
         double mobHealthFactor = Math.min(rawMultiplier, isBoss ? config.bossMaxFactor : settings.maxFactorHealth);
         double mobDamageFactor = Math.min(rawMultiplier, settings.maxFactorDamage);
@@ -145,14 +141,11 @@ public class DifficultyCalculator {
         int guaranteedRolls = (int) Math.floor(effectiveRolls);
         float fractionalRoll = effectiveRolls - guaranteedRolls;
         int totalExtraRolls = guaranteedRolls;
-        if (fractionalRoll > 0 && mob.level().random.nextFloat() < fractionalRoll)
-            totalExtraRolls++;
-        for (int i = 0; i < totalExtraRolls; i++) {
+        if (fractionalRoll > 0 && mob.level().random.nextFloat() < fractionalRoll) totalExtraRolls++;
+        for (int i = 0; i < totalExtraRolls; i++)
             lootTable.getRandomItems(lootParams, mob.getLootTableSeed(), stack -> {
-                if (!stack.isEmpty())
-                    mob.spawnAtLocation(stack);
+                if (!stack.isEmpty()) mob.spawnAtLocation(stack);
             });
-        }
     }
 
     public static float calculateExtraRolls(Mob mob) {
@@ -181,18 +174,13 @@ public class DifficultyCalculator {
 
     public static float scaleDamage(Mob mob, float originalDamage, DamageSource source) {
         Entity directEntity = source.getDirectEntity();
-        boolean isIndirectOrSpecial = directEntity != mob ||
-                source.is(DamageTypeTags.IS_PROJECTILE) ||
-                source.is(DamageTypeTags.IS_EXPLOSION) ||
-                mob instanceof EnderDragon ||
-                mob instanceof Guardian;
+        boolean isIndirectOrSpecial = directEntity != mob || source.is(DamageTypeTags.IS_PROJECTILE) ||
+                source.is(DamageTypeTags.IS_EXPLOSION) || mob instanceof EnderDragon || mob instanceof Guardian;
 
         if (!isIndirectOrSpecial) return originalDamage;
         float damageFactor = mob.getData(ModAttachments.DIFFICULTY_MULTIPLIER);
-        if (mob instanceof Creeper)
-            damageFactor *= (float) ScalingDifficulty.CONFIG.creeperExplosionFactor;
-        if (damageFactor > 1.0f)
-            return originalDamage * damageFactor;
+        if (mob instanceof Creeper) damageFactor *= (float) ScalingDifficulty.CONFIG.creeperExplosionFactor;
+        if (damageFactor > 1.0f) return originalDamage * damageFactor;
 
         return originalDamage;
     }

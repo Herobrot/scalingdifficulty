@@ -41,9 +41,7 @@ public class EntityEvents {
         DamageSource source = event.getSource();
         if (source.getEntity() instanceof Mob mob) {
             float newDamage = DifficultyCalculator.scaleDamage(mob, event.getAmount(), source);
-            if (newDamage != event.getAmount()) {
-                event.setAmount(newDamage);
-            }
+            if (newDamage != event.getAmount()) event.setAmount(newDamage);
         }
     }
 }

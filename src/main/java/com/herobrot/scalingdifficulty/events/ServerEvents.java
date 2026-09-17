@@ -10,13 +10,14 @@ import net.neoforged.neoforge.event.RegisterCommandsEvent;
 
 @EventBusSubscriber(modid = ScalingDifficulty.MOD_ID)
 public class ServerEvents {
+
     @SubscribeEvent
     public static void onAddReloadListeners(AddReloadListenerEvent event) {
         event.addListener(new DimensionDifficultyLoader());
     }
+
     @SubscribeEvent
     public static void onRegisterCommands(RegisterCommandsEvent event) {
-        if (ScalingDifficulty.CONFIG.devMode)
-            DiagnosticCommand.register(event.getDispatcher());
+        if (ScalingDifficulty.CONFIG.devMode) DiagnosticCommand.register(event.getDispatcher());
     }
 }

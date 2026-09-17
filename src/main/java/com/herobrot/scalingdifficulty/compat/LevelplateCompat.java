@@ -13,8 +13,7 @@ import net.minecraft.world.entity.ai.attributes.DefaultAttributes;
 public class LevelplateCompat {
     public static int getMobLevel(Mob mob) {
         LevelplateAttachments.MobLevelData data = mob.getData(LevelplateAttachments.MOB_DATA);
-        if (data.level > 1)
-            return data.level;
+        if (data.level > 1) return data.level;
 
         int levelMultiplier = Levelplate.CONFIG.levelMultiplier;
         if (Levelplate.CONFIG.useScalingDifficultyLvl) {

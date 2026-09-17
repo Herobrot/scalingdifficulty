@@ -20,7 +20,5 @@ public class ClientEvents {
     }
 
     @SubscribeEvent
-    public static void onRenderGui(RenderGuiEvent.Post event) {
-        DebugHudOverlay.renderDebugHud(event);
-    }
+    public static void onRenderGui(RenderGuiEvent.Post event) { DebugHudOverlay.renderDebugHud(event); }
 }
