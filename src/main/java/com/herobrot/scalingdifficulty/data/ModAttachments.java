@@ -25,6 +25,13 @@ public class ModAttachments {
                     .build()
     );
 
+    public static final Supplier<AttachmentType<Boolean>> IN_ZONE = ATTACHMENT_TYPES.register(
+            "in_zone",
+            () -> AttachmentType.builder(() -> false)
+                    .serialize(Codec.BOOL)
+                    .build()
+    );
+
     public static final Supplier<AttachmentType<Boolean>> BIG_ZOMBIE = ATTACHMENT_TYPES.register(
             "big_zombie",
             () -> AttachmentType.builder(() -> false)

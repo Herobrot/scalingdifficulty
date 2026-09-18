@@ -1,0 +1,161 @@
+package com.herobrot.scalingdifficulty.zone;
+
+import net.minecraft.ChatFormatting;
+import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+
+import javax.annotation.Nullable;
+import java.util.UUID;
+
+public class DifficultyZone {
+
+    public enum Shape {
+        BOX,
+        SPHERE
+    }
+
+    private final UUID id;
+    private final String dimension;
+    private final Shape shape;
+    private final double factor;
+    @Nullable
+    private final String name;
+
+    // Box
+    private final BlockPos boxMin;
+    private final BlockPos boxMax;
+
+    // Sphere
+    private final BlockPos center;
+    private final double radius;
+
+    private DifficultyZone(UUID id, String dimension, Shape shape, double factor, @Nullable String name,
+                           BlockPos boxMin, BlockPos boxMax, BlockPos center, double radius) {
+        this.id = id;
+        this.dimension = dimension;
+        this.shape = shape;
+        this.factor = factor;
+        this.name = name;
+        this.boxMin = boxMin;
+        this.boxMax = boxMax;
+        this.center = center;
+        this.radius = radius;
+    }
+
+    public static DifficultyZone createBox(String dimension, BlockPos pos1, BlockPos pos2, double factor, @Nullable String name) {
+        BlockPos min = new BlockPos(
+                Math.min(pos1.getX(), pos2.getX()),
+                Math.min(pos1.getY(), pos2.getY()),
+                Math.min(pos1.getZ(), pos2.getZ()));
+        BlockPos max = new BlockPos(
+                Math.max(pos1.getX(), pos2.getX()),
+                Math.max(pos1.getY(), pos2.getY()),
+                Math.max(pos1.getZ(), pos2.getZ()));
+        return new DifficultyZone(UUID.randomUUID(), dimension, Shape.BOX, factor, name, min, max, null, 0);
+    }
+
+    public static DifficultyZone createSphere(String dimension, BlockPos center, double radius, double factor, @Nullable String name) {
+        return new DifficultyZone(UUID.randomUUID(), dimension, Shape.SPHERE, factor, name, null, null, center, radius);
+    }
+
+    public boolean contains(String dimensionKey, double x, double y, double z) {
+        if (!dimension.equals(dimensionKey)) return false;
+
+        if (shape == Shape.BOX)
+            return x >= boxMin.getX() && x <= boxMax.getX() + 1 && y >= boxMin.getY() && y <= boxMax.getY() + 1 && z >= boxMin.getZ() && z <= boxMax.getZ() + 1;
+        else {
+            double dx = x - (center.getX() + 0.5);
+            double dy = y - (center.getY() + 0.5);
+            double dz = z - (center.getZ() + 0.5);
+            return dx * dx + dy * dy + dz * dz <= radius * radius;
+        }
+    }
+
+    public CompoundTag toNbt() {
+        CompoundTag nbt = new CompoundTag();
+        nbt.putUUID("Id", id);
+        nbt.putString("Dimension", dimension);
+        nbt.putString("Shape", shape.name());
+        nbt.putDouble("Factor", factor);
+        if (name != null) nbt.putString("Name", name);
+        if (shape == Shape.BOX) {
+            nbt.putIntArray("BoxMin", new int[]{boxMin.getX(), boxMin.getY(), boxMin.getZ()});
+            nbt.putIntArray("BoxMax", new int[]{boxMax.getX(), boxMax.getY(), boxMax.getZ()});
+        } else {
+            nbt.putIntArray("Center", new int[]{center.getX(), center.getY(), center.getZ()});
+            nbt.putDouble("Radius", radius);
+        }
+        return nbt;
+    }
+
+    public static DifficultyZone fromNbt(CompoundTag nbt) {
+        UUID id = nbt.getUUID("Id");
+        String dimension = nbt.getString("Dimension");
+        Shape shape = Shape.valueOf(nbt.getString("Shape"));
+        double factor = nbt.getDouble("Factor");
+        String name = nbt.contains("Name") ? nbt.getString("Name") : null;
+
+        if (shape == Shape.BOX) {
+            int[] min = nbt.getIntArray("BoxMin");
+            int[] max = nbt.getIntArray("BoxMax");
+            return new DifficultyZone(id, dimension, shape, factor, name, new BlockPos(min[0], min[1], min[2]), new BlockPos(max[0], max[1], max[2]), null, 0);
+        } else {
+            int[] c = nbt.getIntArray("Center");
+            double radius = nbt.getDouble("Radius");
+            return new DifficultyZone(id, dimension, shape, factor, name, null, null, new BlockPos(c[0], c[1], c[2]), radius);
+        }
+    }
+
+    public UUID getId() { return id; }
+
+    public String getDimension() { return dimension; }
+
+    public Shape getShape() { return shape; }
+
+    public double getFactor() { return factor; }
+
+    @Nullable
+    public String getName() { return name; }
+
+    public BlockPos getBoxMin() { return boxMin; }
+
+    public BlockPos getBoxMax() { return boxMax; }
+
+    public BlockPos getCenter() { return center; }
+
+    public double getRadius() { return radius; }
+
+    public String getShortId() { return id.toString().substring(0, 8); }
+
+    public String getDisplayText() { return name != null && !name.isBlank() ? name : getShortId(); }
+
+    public MutableComponent getDisplayIdentifier() { return Component.literal(getDisplayText()); }
+
+    public MutableComponent describeComponent(boolean localized) {
+        String factorText = String.format("%.2f", factor);
+        MutableComponent shapeComponent = (localized
+                ? Component.translatable(shape == Shape.BOX ? "command.scalingdifficulty.zone.shape.box" : "command.scalingdifficulty.zone.shape.sphere")
+                : Component.literal(shape == Shape.BOX ? "Box" : "Sphere")).withStyle(ChatFormatting.GOLD);
+        MutableComponent origin = Component.literal(formatCoords(shape == Shape.BOX ? boxMin : center)).withStyle(ChatFormatting.AQUA);
+        MutableComponent factorComponent = Component.literal(factorText).withStyle(ChatFormatting.YELLOW);
+        if (shape == Shape.BOX) {
+            MutableComponent dest = Component.literal(formatCoords(boxMax)).withStyle(ChatFormatting.GREEN);
+            if (localized)
+                return Component.translatable("command.scalingdifficulty.zone.desc.box", shapeComponent, origin, dest, factorComponent);
+            return Component.literal("").append(shapeComponent).append(Component.literal(" [")).append(origin)
+                    .append(Component.literal("] -> [")).append(dest).append(Component.literal("], factor ")).append(factorComponent);
+        } else {
+            MutableComponent radiusComponent = Component.literal(String.format("%.1f", radius)).withStyle(ChatFormatting.GREEN);
+            if (localized)
+                return Component.translatable("command.scalingdifficulty.zone.desc.sphere", shapeComponent, origin, radiusComponent, factorComponent);
+            return Component.literal("").append(shapeComponent).append(Component.literal(" at [")).append(origin)
+                    .append(Component.literal("], radius ")).append(radiusComponent).append(Component.literal(", factor ")).append(factorComponent);
+        }
+    }
+
+    public static String formatCoords(BlockPos pos) { return pos.getX() + ", " + pos.getY() + ", " + pos.getZ(); }
+
+    public static String formatCoords(int x, int y, int z) { return x + ", " + y + ", " + z; }
+}

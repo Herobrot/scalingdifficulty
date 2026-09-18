@@ -23,9 +23,13 @@ public class ScalingDifficulty {
         ConfigInit.init();
         CONFIG = ConfigInit.CONFIG;
         ModAttachments.ATTACHMENT_TYPES.register(modEventBus);
-
         isLevelplateLoaded = ModList.get().isLoaded("levelplate");
-
         if (FMLEnvironment.dist.isClient()) ClientEvents.registerConfigScreen(modContainer);
+    }
+
+    public static String getModVersion() {
+        return ModList.get().getModContainerById(ScalingDifficulty.MOD_ID)
+                .map(container -> container.getModInfo().getVersion().toString())
+                .orElse("1.1.0");
     }
 }
