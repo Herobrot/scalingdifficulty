@@ -110,6 +110,8 @@ public class DifficultyZone {
 
     public UUID getId() { return id; }
 
+    public String getIdString() { return id.toString(); }
+
     public String getDimension() { return dimension; }
 
     public Shape getShape() { return shape; }

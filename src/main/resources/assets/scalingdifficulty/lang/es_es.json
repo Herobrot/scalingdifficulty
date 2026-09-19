@@ -95,6 +95,7 @@
   "command.scalingdifficulty.zone.created": "Zona de dificultad %s creada: %s",
   "command.scalingdifficulty.zone.removed": "La zona de dificultad %s fue eliminada.",
   "command.scalingdifficulty.zone.not_found": "No se encontró ninguna zona de dificultad que coincida con '%s'.",
+  "command.scalingdifficulty.zone.name_taken": "Ya existe una zona llamada '%s'. Los nombres de zona deben ser unicos.",
   "command.scalingdifficulty.zone.ambiguous": "Varias zonas de dificultad coinciden con '%s'. Usa un prefijo de ID mas largo o el nombre exacto.",
   "command.scalingdifficulty.zone.list.empty": "No hay zonas de dificultad definidas.",
   "command.scalingdifficulty.zone.list.header": "Zonas de dificultad activas (%s):",

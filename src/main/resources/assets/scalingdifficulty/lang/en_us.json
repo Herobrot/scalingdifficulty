@@ -95,6 +95,7 @@
   "command.scalingdifficulty.zone.created": "Difficulty zone %s created: %s",
   "command.scalingdifficulty.zone.removed": "Difficulty zone %s was removed.",
   "command.scalingdifficulty.zone.not_found": "No difficulty zone matching '%s' was found.",
+  "command.scalingdifficulty.zone.name_taken": "A zone named '%s' already exists. Zone names must be unique.",
   "command.scalingdifficulty.zone.ambiguous": "Multiple difficulty zones match '%s'. Use a longer ID prefix or the exact name.",
   "command.scalingdifficulty.zone.list.empty": "No difficulty zones are defined.",
   "command.scalingdifficulty.zone.list.header": "Active difficulty zones (%s):",

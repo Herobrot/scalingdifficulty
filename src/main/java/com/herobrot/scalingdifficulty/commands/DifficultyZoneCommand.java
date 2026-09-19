@@ -15,6 +15,7 @@ import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 
 import java.util.List;
@@ -26,6 +27,12 @@ public class DifficultyZoneCommand {
     private static final SuggestionProvider<CommandSourceStack> ZONE_SUGGESTIONS = (context, builder) -> {
         for (DifficultyZone zone : DifficultyZoneSavedData.get(context.getSource().getServer()).getZones())
             builder.suggest(zone.getDisplayText());
+        return builder.buildFuture();
+    };
+
+    private static final SuggestionProvider<CommandSourceStack> ZONE_IDS_SUGGESTIONS = (context, builder) -> {
+        for (DifficultyZone zone : DifficultyZoneSavedData.get(context.getSource().getServer()).getZones())
+            builder.suggest(zone.getIdString());
         return builder.buildFuture();
     };
 
@@ -51,7 +58,11 @@ public class DifficultyZoneCommand {
                         .then(Commands.literal("remove")
                                 .then(Commands.argument("id", StringArgumentType.string())
                                         .suggests(ZONE_SUGGESTIONS)
-                                        .executes(DifficultyZoneCommand::remove)))
+                                        .executes(DifficultyZoneCommand::remove))
+                                .then(Commands.literal("id")
+                                        .then(Commands.argument("id", StringArgumentType.string())
+                                                .suggests(ZONE_IDS_SUGGESTIONS)
+                                                .executes(DifficultyZoneCommand::remove))))
                         .then(Commands.literal("list")
                                 .executes(DifficultyZoneCommand::list))));
     }
@@ -61,13 +72,16 @@ public class DifficultyZoneCommand {
         BlockPos pos1 = BlockPosArgument.getBlockPos(context, "pos1");
         BlockPos pos2 = BlockPosArgument.getBlockPos(context, "pos2");
         double factor = DoubleArgumentType.getDouble(context, "factor");
+        if (name != null && nameExists(source.getServer(), name)) {
+            source.sendFailure(plain(source, "command.scalingdifficulty.zone.name_taken",
+                    "A zone named '%s' already exists. Zone names must be unique.", name));
+            return 0;
+        }
 
         String dimension = source.getLevel().dimension().location().toString();
         DifficultyZone zone = DifficultyZone.createBox(dimension, pos1, pos2, factor, name);
-
         DifficultyZoneSavedData.get(source.getServer()).addZone(zone);
         ZoneSyncManager.syncToAll(source.getServer());
-
         sendCreated(source, zone);
         return 1;
     }
@@ -77,13 +91,16 @@ public class DifficultyZoneCommand {
         BlockPos center = BlockPosArgument.getBlockPos(context, "center");
         double radius = DoubleArgumentType.getDouble(context, "radius");
         double factor = DoubleArgumentType.getDouble(context, "factor");
+        if (name != null && nameExists(source.getServer(), name)) {
+            source.sendFailure(plain(source, "command.scalingdifficulty.zone.name_taken",
+                    "A zone named '%s' already exists. Zone names must be unique.", name));
+            return 0;
+        }
 
         String dimension = source.getLevel().dimension().location().toString();
         DifficultyZone zone = DifficultyZone.createSphere(dimension, center, radius, factor, name);
-
         DifficultyZoneSavedData.get(source.getServer()).addZone(zone);
         ZoneSyncManager.syncToAll(source.getServer());
-
         sendCreated(source, zone);
         return 1;
     }
@@ -116,6 +133,12 @@ public class DifficultyZoneCommand {
         return 1;
     }
 
+    private static boolean nameExists(MinecraftServer server, String name) {
+        for (DifficultyZone zone : DifficultyZoneSavedData.get(server).getZones())
+            if (name.equals(zone.getName())) return true;
+        return false;
+    }
+
     private static boolean matchesZone(DifficultyZone zone, String input) {
         String id = zone.getId().toString();
         if (id.equals(input)) return true;
@@ -134,9 +157,10 @@ public class DifficultyZoneCommand {
         source.sendSuccess(() -> plain(source, "command.scalingdifficulty.zone.list.header", "Active difficulty zones (%s):", String.valueOf(zones.size())).withStyle(ChatFormatting.YELLOW), false);
         boolean localized = isLocalized(source);
         for (DifficultyZone zone : zones) {
-            if (localized) source.sendSuccess(() -> Component.translatable("command.scalingdifficulty.zone.list.entry",
-                        zone.getDisplayIdentifier().withStyle(ChatFormatting.GOLD),
-                        zone.describeComponent(true)), false);
+            if (localized)
+                source.sendSuccess(() -> Component.translatable("command.scalingdifficulty.zone.list.entry",
+                        zone.getDisplayIdentifier().withStyle(ChatFormatting.GOLD), zone.describeComponent(true)),
+                        false);
             else source.sendSuccess(() -> Component.literal("- ")
                         .append(zone.getDisplayIdentifier().withStyle(ChatFormatting.GOLD))
                         .append(Component.literal(": "))
