@@ -75,10 +75,16 @@ public class ScalingDifficultyConfig implements ConfigData {
     @ConfigEntry.Gui.Tooltip
     public double playerRadius = 100.0D;
 
+    @ConfigEntry.Category("gui_settings")
     @ConfigEntry.Gui.Tooltip
     public boolean hudTesting = false;
+    @ConfigEntry.Category("gui_settings")
+    @ConfigEntry.BoundedDiscrete(min = 1, max = 32)
+    @ConfigEntry.Gui.Tooltip
+    public int renderDistance = 8;
 
     @Comment("Solo para uso del desarrollador.\nActiva el commando /sddiag")
+    @ConfigEntry.Category("gui_settings")
     @ConfigEntry.Gui.RequiresRestart
     public boolean devMode = false;
 

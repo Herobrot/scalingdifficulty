@@ -58,8 +58,12 @@
   "text.autoconfig.scalingdifficulty.option.excludedEntity": "Excluded Entity List",
   "text.autoconfig.scalingdifficulty.option.excludedEntity.@Tooltip": "e.g., minecraft:villager",
 
+  "text.autoconfig.scalingdifficulty.category.gui_settings": "GUI Settings",
+
   "text.autoconfig.scalingdifficulty.option.hudTesting": "HUD Testing",
-  "text.autoconfig.scalingdifficulty.option.hudTesting.@Tooltip": "Dev feature. Shows difficulty multipliers on screen when aiming at a mob",
+  "text.autoconfig.scalingdifficulty.option.hudTesting.@Tooltip": "Dev feature. Shows visual information from the mod",
+  "text.autoconfig.scalingdifficulty.option.renderDistance": "Render Distance",
+  "text.autoconfig.scalingdifficulty.option.renderDistance.@Tooltip": "Render distance for zone edges in the HUD testing",
   "text.autoconfig.scalingdifficulty.option.devMode": "Dev Mode",
 
   "text.autoconfig.scalingdifficulty.category.monster_setting": "Monster Settings",

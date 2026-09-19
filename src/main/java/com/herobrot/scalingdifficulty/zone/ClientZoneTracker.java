@@ -21,6 +21,7 @@ public class ClientZoneTracker {
     private static BlockPos lastCheckedPos = null;
     @Nullable
     private static ZoneSyncPayload.ZoneEntry currentZone = null;
+    public static List<ZoneSyncPayload.ZoneEntry> getZones() { return zones; }
 
     public static void updateZones(List<ZoneSyncPayload.ZoneEntry> newZones) {
         zones = newZones;
