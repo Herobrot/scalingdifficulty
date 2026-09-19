@@ -11,6 +11,7 @@ import com.mojang.brigadier.suggestion.SuggestionProvider;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
+import net.minecraft.commands.arguments.UuidArgument;
 import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
@@ -19,6 +20,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 
 import java.util.List;
+import java.util.UUID;
 
 public class DifficultyZoneCommand {
 
@@ -60,9 +62,9 @@ public class DifficultyZoneCommand {
                                         .suggests(ZONE_SUGGESTIONS)
                                         .executes(DifficultyZoneCommand::remove))
                                 .then(Commands.literal("id")
-                                        .then(Commands.argument("id", StringArgumentType.string())
+                                        .then(Commands.argument("uuid", UuidArgument.uuid())
                                                 .suggests(ZONE_IDS_SUGGESTIONS)
-                                                .executes(DifficultyZoneCommand::remove))))
+                                                .executes(DifficultyZoneCommand::removeById))))
                         .then(Commands.literal("list")
                                 .executes(DifficultyZoneCommand::list))));
     }
@@ -133,6 +135,23 @@ public class DifficultyZoneCommand {
         return 1;
     }
 
+    private static int removeById(CommandContext<CommandSourceStack> context) {
+        CommandSourceStack source = context.getSource();
+        UUID uuid = UuidArgument.getUuid(context, "uuid");
+
+        for (DifficultyZone zone : DifficultyZoneSavedData.get(source.getServer()).getZones())
+            if (zone.getId().equals(uuid)) {
+                DifficultyZoneSavedData.get(source.getServer()).removeZone(uuid);
+                ZoneSyncManager.syncToAll(source.getServer());
+                sendRemoved(source, zone);
+                return 1;
+            }
+
+        source.sendFailure(plain(source, "command.scalingdifficulty.zone.not_found",
+                "No difficulty zone matching '%s' was found.", uuid.toString()));
+        return 0;
+    }
+
     private static boolean nameExists(MinecraftServer server, String name) {
         for (DifficultyZone zone : DifficultyZoneSavedData.get(server).getZones())
             if (name.equals(zone.getName())) return true;
@@ -140,7 +159,7 @@ public class DifficultyZoneCommand {
     }
 
     private static boolean matchesZone(DifficultyZone zone, String input) {
-        String id = zone.getId().toString();
+        String id = zone.getIdString();
         if (id.equals(input)) return true;
         if (input.length() >= MIN_ID_PREFIX_LENGTH && id.startsWith(input)) return true;
         return input.equals(zone.getName());
