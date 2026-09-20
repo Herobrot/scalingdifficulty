@@ -5,45 +5,115 @@ import com.herobrot.scalingdifficulty.ScalingDifficulty;
 import com.herobrot.scalingdifficulty.config.ScalingDifficultyConfig;
 import net.minecraft.util.GsonHelper;
 
+import javax.annotation.Nullable;
+
+/**
+ * Ajustes de dificultad para una dimension. Solo almacena los valores que el
+ * datapack define explicitamente; los getters resuelven contra la config
+ * global en vivo, permitiendo cambios en caliente de esta ultima.
+ */
 public class DimensionSettings {
-    public final Integer distanceCoordinatesX;
-    public final Integer distanceCoordinatesZ;
-    public final int increasingDistance;
-    public final double distanceFactor;
-    public final int increasingTime;
-    public final double timeFactor;
-    public final int heightDistance;
-    public final double heightFactor;
-    public final double maxFactorHealth;
-    public final double maxFactorDamage;
-    public final double maxFactorProtection;
-    public final double maxFactorSpeed;
-    public final double startingFactor;
-    public final int startingDistance;
-    public final int startingTime;
-    public final int startingHeight;
-    public final boolean positiveHeightIncrement;
-    public final boolean negativeHeightIncrement;
+
+    @Nullable private final Integer distanceCoordinatesX;
+    @Nullable private final Integer distanceCoordinatesZ;
+    @Nullable private final Integer increasingDistance;
+    @Nullable private final Double distanceFactor;
+    @Nullable private final Integer increasingTime;
+    @Nullable private final Double timeFactor;
+    @Nullable private final Integer heightDistance;
+    @Nullable private final Double heightFactor;
+    @Nullable private final Double maxFactorHealth;
+    @Nullable private final Double maxFactorDamage;
+    @Nullable private final Double maxFactorProtection;
+    @Nullable private final Double maxFactorSpeed;
+    @Nullable private final Double levelFactor;
+    @Nullable private final Double playerRadius;
+    @Nullable private final Double startingFactor;
+    @Nullable private final Integer startingDistance;
+    @Nullable private final Integer startingTime;
+    @Nullable private final Integer startingHeight;
+    @Nullable private final Boolean positiveHeightIncrement;
+    @Nullable private final Boolean negativeHeightIncrement;
 
     public DimensionSettings(JsonObject data) {
-        ScalingDifficultyConfig c = ScalingDifficulty.CONFIG;
-        this.distanceCoordinatesX = data.has("distanceCoordinatesX") ? data.get("distanceCoordinatesX").getAsInt() : null;
-        this.distanceCoordinatesZ = data.has("distanceCoordinatesZ") ? data.get("distanceCoordinatesZ").getAsInt() : null;
-        this.increasingDistance = GsonHelper.getAsInt(data, "increasingDistance", c.increasingDistance);
-        this.distanceFactor = GsonHelper.getAsDouble(data, "distanceFactor", c.distanceFactor);
-        this.increasingTime = GsonHelper.getAsInt(data, "increasingTime", c.increasingTime);
-        this.timeFactor = GsonHelper.getAsDouble(data, "timeFactor", c.timeFactor);
-        this.heightDistance = GsonHelper.getAsInt(data, "heightDistance", c.heightDistance);
-        this.heightFactor = GsonHelper.getAsDouble(data, "heightFactor", c.heightFactor);
-        this.maxFactorHealth = GsonHelper.getAsDouble(data, "maxFactorHealth", c.maxFactorHealth);
-        this.maxFactorDamage = GsonHelper.getAsDouble(data, "maxFactorDamage", c.maxFactorDamage);
-        this.maxFactorProtection = GsonHelper.getAsDouble(data, "maxFactorProtection", c.maxFactorProtection);
-        this.maxFactorSpeed = GsonHelper.getAsDouble(data, "maxFactorSpeed", c.maxFactorSpeed);
-        this.startingFactor = GsonHelper.getAsDouble(data, "startingFactor", c.startingFactor);
-        this.startingDistance = GsonHelper.getAsInt(data, "startingDistance", c.startingDistance);
-        this.startingTime = GsonHelper.getAsInt(data, "startingTime", c.startingTime);
-        this.startingHeight = GsonHelper.getAsInt(data, "startingHeight", c.startingHeight);
-        this.positiveHeightIncrement = GsonHelper.getAsBoolean(data, "positiveHeightIncrement", c.positiveHeightIncrement);
-        this.negativeHeightIncrement = GsonHelper.getAsBoolean(data, "negativeHeightIncrement", c.negativeHeightIncrement);
+        this.distanceCoordinatesX = getNullableInt(data, "distanceCoordinatesX");
+        this.distanceCoordinatesZ = getNullableInt(data, "distanceCoordinatesZ");
+        this.increasingDistance = getNullableInt(data, "increasingDistance");
+        this.distanceFactor = getNullableDouble(data, "distanceFactor");
+        this.increasingTime = getNullableInt(data, "increasingTime");
+        this.timeFactor = getNullableDouble(data, "timeFactor");
+        this.heightDistance = getNullableInt(data, "heightDistance");
+        this.heightFactor = getNullableDouble(data, "heightFactor");
+        this.maxFactorHealth = getNullableDouble(data, "maxFactorHealth");
+        this.maxFactorDamage = getNullableDouble(data, "maxFactorDamage");
+        this.maxFactorProtection = getNullableDouble(data, "maxFactorProtection");
+        this.maxFactorSpeed = getNullableDouble(data, "maxFactorSpeed");
+        this.levelFactor = getNullableDouble(data, "levelFactor");
+        this.playerRadius = getNullableDouble(data, "playerRadius");
+        this.startingFactor = getNullableDouble(data, "startingFactor");
+        this.startingDistance = getNullableInt(data, "startingDistance");
+        this.startingTime = getNullableInt(data, "startingTime");
+        this.startingHeight = getNullableInt(data, "startingHeight");
+        this.positiveHeightIncrement = getNullableBoolean(data, "positiveHeightIncrement");
+        this.negativeHeightIncrement = getNullableBoolean(data, "negativeHeightIncrement");
     }
+
+    @Nullable
+    private static Integer getNullableInt(JsonObject data, String key) {
+        return data.has(key) ? GsonHelper.getAsInt(data, key) : null;
+    }
+
+    @Nullable
+    private static Double getNullableDouble(JsonObject data, String key) {
+        return data.has(key) ? GsonHelper.getAsDouble(data, key) : null;
+    }
+
+    @Nullable
+    private static Boolean getNullableBoolean(JsonObject data, String key) {
+        return data.has(key) ? GsonHelper.getAsBoolean(data, key) : null;
+    }
+
+    private static ScalingDifficultyConfig config() { return ScalingDifficulty.CONFIG; }
+
+    @Nullable
+    public Integer getDistanceCoordinatesX() { return distanceCoordinatesX != null ? distanceCoordinatesX : null; }
+
+    @Nullable
+    public Integer getDistanceCoordinatesZ() { return distanceCoordinatesZ != null ? distanceCoordinatesZ : null; }
+
+    public int getIncreasingDistance() { return increasingDistance != null ? increasingDistance : config().increasingDistance; }
+
+    public double getDistanceFactor() { return distanceFactor != null ? distanceFactor : config().distanceFactor; }
+
+    public int getIncreasingTime() { return increasingTime != null ? increasingTime : config().increasingTime; }
+
+    public double getTimeFactor() { return timeFactor != null ? timeFactor : config().timeFactor; }
+
+    public int getHeightDistance() { return heightDistance != null ? heightDistance : config().heightDistance; }
+
+    public double getHeightFactor() { return heightFactor != null ? heightFactor : config().heightFactor; }
+
+    public double getMaxFactorHealth() { return maxFactorHealth != null ? maxFactorHealth : config().maxFactorHealth; }
+
+    public double getMaxFactorDamage() { return maxFactorDamage != null ? maxFactorDamage : config().maxFactorDamage; }
+
+    public double getMaxFactorProtection() { return maxFactorProtection != null ? maxFactorProtection : config().maxFactorProtection; }
+
+    public double getMaxFactorSpeed() { return maxFactorSpeed != null ? maxFactorSpeed : config().maxFactorSpeed; }
+
+    public double getLevelFactor() { return levelFactor != null ? levelFactor : config().levelFactor; }
+
+    public double getPlayerRadius() { return playerRadius != null ? playerRadius : config().playerRadius; }
+
+    public double getStartingFactor() { return startingFactor != null ? startingFactor : config().startingFactor; }
+
+    public int getStartingDistance() { return startingDistance != null ? startingDistance : config().startingDistance; }
+
+    public int getStartingTime() { return startingTime != null ? startingTime : config().startingTime; }
+
+    public int getStartingHeight() { return startingHeight != null ? startingHeight : config().startingHeight; }
+
+    public boolean isPositiveHeightIncrement() { return positiveHeightIncrement != null ? positiveHeightIncrement : config().positiveHeightIncrement; }
+
+    public boolean isNegativeHeightIncrement() { return negativeHeightIncrement != null ? negativeHeightIncrement : config().negativeHeightIncrement; }
 }

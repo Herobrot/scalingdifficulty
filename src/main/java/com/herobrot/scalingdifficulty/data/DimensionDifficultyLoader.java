@@ -18,14 +18,13 @@ public class DimensionDifficultyLoader extends SimpleJsonResourceReloadListener 
     private static final Gson GSON = new GsonBuilder().create();
     private static final Map<String, DimensionSettings> DIMENSIONS = new HashMap<>();
 
-    private static DimensionSettings FALLBACK_SETTINGS;
+    private static final DimensionSettings FALLBACK_SETTINGS = new DimensionSettings(new JsonObject());
 
     public DimensionDifficultyLoader() { super(GSON, "difficulty"); }
 
     @Override
     protected void apply(Map<ResourceLocation, JsonElement> jsonMap, @NotNull ResourceManager resourceManager, @NotNull ProfilerFiller profiler) {
         DIMENSIONS.clear();
-        FALLBACK_SETTINGS = new DimensionSettings(new JsonObject()); 
 
         jsonMap.forEach((location, element) -> {
             try {
@@ -42,7 +41,6 @@ public class DimensionDifficultyLoader extends SimpleJsonResourceReloadListener 
     }
 
     public static DimensionSettings getSettings(String dimensionId) {
-        if (FALLBACK_SETTINGS == null) FALLBACK_SETTINGS = new DimensionSettings(new JsonObject());
         return DIMENSIONS.getOrDefault(dimensionId, FALLBACK_SETTINGS);
     }
 }
