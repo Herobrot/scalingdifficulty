@@ -51,9 +51,9 @@
   "text.autoconfig.scalingdifficulty.option.lootRollsFactor.@Tooltip": "The number of times a monster can drop loot\n(0.5 times on a monster factor of 3.00x = at least 1.5 additional loot)",
   "text.autoconfig.scalingdifficulty.option.maxRollsPerDeath": "Max Loot Per Death",
   "text.autoconfig.scalingdifficulty.option.levelFactor": "Level Factor",
-  "text.autoconfig.scalingdifficulty.option.levelFactor.@Tooltip": "Only applies when LevelZ is loaded. 0.0 = disabled",
+  "text.autoconfig.scalingdifficulty.option.levelFactor.@Tooltip": "Only applies when Hero's Levels is loaded. 0.0 = disabled",
   "text.autoconfig.scalingdifficulty.option.playerRadius": "Player Radius",
-  "text.autoconfig.scalingdifficulty.option.playerRadius.@Tooltip": "Only applies when LevelZ is loaded. Evaluates players within this radius",
+  "text.autoconfig.scalingdifficulty.option.playerRadius.@Tooltip": "Only applies when Hero's Levels is loaded. Evaluates players within this radius",
 
   "text.autoconfig.scalingdifficulty.option.excludedEntity": "Excluded Entity List",
   "text.autoconfig.scalingdifficulty.option.excludedEntity.@Tooltip": "e.g., minecraft:villager",
@@ -120,5 +120,6 @@
   "debug.scalingdifficulty.height": "Height: ",
   "debug.scalingdifficulty.next_factor": "Est. Next Spawn Factor: ",
   "debug.scalingdifficulty.zone": "Zone: ",
-  "debug.scalingdifficulty.zone.dimension": "Dimension: %s"
+  "debug.scalingdifficulty.zone.dimension": "Dimension: %s",
+  "debug.scalingdifficulty.level": "Level: "
 }

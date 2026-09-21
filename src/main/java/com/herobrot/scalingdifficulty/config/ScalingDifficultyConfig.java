@@ -69,11 +69,13 @@ public class ScalingDifficultyConfig implements ConfigData {
     public float lootRollsFactor = 1.0F;
     public float maxRollsPerDeath = 3.0F;
 
-    //TODO until LevelZ is ported
     @ConfigEntry.Gui.Tooltip
     public double levelFactor = 0.0D;
     @ConfigEntry.Gui.Tooltip
     public double playerRadius = 100.0D;
+
+    @ConfigEntry.Gui.Tooltip
+    public ArrayList<String> excludedEntity = new ArrayList<>(List.of("the_bumblezone:cosmic_crystal_entity"));
 
     @ConfigEntry.Category("gui_settings")
     @ConfigEntry.Gui.Tooltip
@@ -88,8 +90,6 @@ public class ScalingDifficultyConfig implements ConfigData {
     @ConfigEntry.Gui.RequiresRestart
     public boolean devMode = false;
 
-    @ConfigEntry.Gui.Tooltip
-    public ArrayList<String> excludedEntity = new ArrayList<>(List.of("the_bumblezone:cosmic_crystal_entity"));
 
     @ConfigEntry.Category("monster_setting")
     public boolean allowSpecialZombie = true;

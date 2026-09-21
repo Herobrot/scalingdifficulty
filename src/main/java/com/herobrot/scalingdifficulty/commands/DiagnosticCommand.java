@@ -2,7 +2,10 @@ package com.herobrot.scalingdifficulty.commands;
 
 import com.herobrot.scalingdifficulty.ScalingDifficulty;
 import com.herobrot.scalingdifficulty.api.DifficultyCalculator;
+import com.herobrot.scalingdifficulty.compat.HerosLevelsCompat;
 import com.herobrot.scalingdifficulty.compat.LevelplateCompat;
+import com.herobrot.scalingdifficulty.data.DimensionDifficultyLoader;
+import com.herobrot.scalingdifficulty.data.DimensionSettings;
 import com.herobrot.scalingdifficulty.data.ModAttachments;
 import com.mojang.brigadier.CommandDispatcher;
 import net.minecraft.ChatFormatting;
@@ -12,6 +15,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.projectile.ProjectileUtil;
@@ -61,6 +65,16 @@ public class DiagnosticCommand {
                         message.append(formatLine("Speedy Zombie: "));
 
                     message.append(formatLineHealth(mob.getHealth(), mob.getMaxHealth()));
+                    if (ScalingDifficulty.isHerosLevelsLoaded && !mob.getData(ModAttachments.IN_ZONE)) {
+                        ServerLevel serverLevel = player.serverLevel();
+                        DimensionSettings settings = DimensionDifficultyLoader.getSettings(
+                                serverLevel.dimension().location().toString());
+                        double averageLevel = HerosLevelsCompat.getAveragePlayerLevel(serverLevel,
+                                mob.getX(), mob.getY(), mob.getZ(), settings.getPlayerRadius());
+                        message.append(formatLine("Nivel promedio (HerosLevels): ", String.format("%.1f", averageLevel)));
+                        message.append(formatLine("Termino de nivel: ", "+" + String.format("%.2f",
+                                averageLevel * settings.getLevelFactor())));
+                    }
                     message.append(Component.literal("--- Loot Info ---\n").withStyle(ChatFormatting.YELLOW));
 
                     if (ScalingDifficulty.isLevelplateLoaded) {

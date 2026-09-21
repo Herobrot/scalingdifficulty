@@ -2,6 +2,7 @@ package com.herobrot.scalingdifficulty.client;
 
 import com.herobrot.scalingdifficulty.ScalingDifficulty;
 import com.herobrot.scalingdifficulty.api.DifficultyCalculator;
+import com.herobrot.scalingdifficulty.compat.HerosLevelsCompat;
 import com.herobrot.scalingdifficulty.config.ScalingDifficultyConfig;
 import com.herobrot.scalingdifficulty.data.DimensionDifficultyLoader;
 import com.herobrot.scalingdifficulty.data.DimensionSettings;
@@ -12,7 +13,6 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.renderer.debug.ChunkBorderRenderer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
@@ -66,6 +66,7 @@ public class DebugHudOverlay {
     private static Component HEIGHT_LABEL;
     private static Component NEXT_FACTOR_LABEL;
     private static Component ZONE_LABEL;
+    private static Component LEVEL_LABEL;
 
     public static void renderDebugHud(RenderGuiEvent.Post event) {
         Minecraft client = Minecraft.getInstance();
@@ -156,28 +157,32 @@ public class DebugHudOverlay {
         String dimensionKey = level.dimension().location().toString();
         DimensionSettings settings = DimensionDifficultyLoader.getSettings(dimensionKey);
         BlockPos spawnPos = level.getSharedSpawnPos();
-        int spawnX = settings.distanceCoordinatesX != null ? settings.distanceCoordinatesX : spawnPos.getX();
-        int spawnZ = settings.distanceCoordinatesZ != null ? settings.distanceCoordinatesZ : spawnPos.getZ();
+        int spawnX = settings.getDistanceCoordinatesX() != null ? settings.getDistanceCoordinatesX() : spawnPos.getX();
+        int spawnZ = settings.getDistanceCoordinatesZ() != null ? settings.getDistanceCoordinatesZ() : spawnPos.getZ();
         float distance = Mth.sqrt((float) player.distanceToSqr(spawnX, player.getY(), spawnZ));
         long worldTime = level.getDayTime();
 
-        float distElapsed = distance - settings.startingDistance;
-        int distDivided = distElapsed > 0 ? (int) (distElapsed / settings.increasingDistance) : 0;
-        if (config.excludeDistanceInOtherDimension && level.dimension() != Level.OVERWORLD) distDivided = 0;
-        double distBonus = distDivided * settings.distanceFactor;
+        float distElapsed = distance - settings.getStartingDistance();
+        double distBonus = 0.0;
+        if (distElapsed > 0 && !(config.excludeDistanceInOtherDimension && level.dimension() != Level.OVERWORLD)) {
+            distBonus = ((double) (int) distElapsed / settings.getIncreasingDistance()) * settings.getDistanceFactor();
+        }
 
-        long timeElapsed = worldTime - (settings.startingTime * DifficultyCalculator.TICKS_PER_MINUTE);
-        int timeDivided = timeElapsed > 0 ? (int) (timeElapsed / (settings.increasingTime * DifficultyCalculator.TICKS_PER_MINUTE)) : 0;
+        long timeElapsed = worldTime - (settings.getStartingTime() * DifficultyCalculator.TICKS_PER_MINUTE);
+        int timeDivided = timeElapsed > 0 ? (int) (timeElapsed / (settings.getIncreasingTime() * DifficultyCalculator.TICKS_PER_MINUTE)) : 0;
         if (config.excludeTimeInOtherDimension && level.dimension() != Level.OVERWORLD) timeDivided = 0;
-        double timeBonus = timeDivided * settings.timeFactor;
+        double timeBonus = timeDivided * settings.getTimeFactor();
 
-        int spawnHeightDivided = (Mth.floor(player.getY()) - settings.startingHeight) / settings.heightDistance;
-        if (!settings.positiveHeightIncrement && spawnHeightDivided > 0) spawnHeightDivided = 0;
-        if (!settings.negativeHeightIncrement && spawnHeightDivided < 0) spawnHeightDivided = 0;
+        int spawnHeightDivided = (Mth.floor(player.getY()) - settings.getStartingHeight()) / settings.getHeightDistance();
+        if (!settings.isPositiveHeightIncrement() && spawnHeightDivided > 0) spawnHeightDivided = 0;
+        if (!settings.isNegativeHeightIncrement() && spawnHeightDivided < 0) spawnHeightDivided = 0;
         if (config.excludeHeightInOtherDimension && level.dimension() != Level.OVERWORLD) spawnHeightDivided = 0;
-        double heightBonus = Math.abs(spawnHeightDivided) * settings.heightFactor;
-        double totalFactor = settings.startingFactor + distBonus + timeBonus + heightBonus;
-        totalFactor = Math.min(totalFactor, settings.maxFactorHealth);
+        double heightBonus = Math.abs(spawnHeightDivided) * settings.getHeightFactor();
+        double levelBonus = 0.0;
+        if (HerosLevelsCompat.shouldApplyLevelFactor(settings))
+            levelBonus = HerosLevelsCompat.getClientPlayerLevel(player) * settings.getLevelFactor();
+        double totalFactor = settings.getStartingFactor() + distBonus + timeBonus + heightBonus + levelBonus;
+        totalFactor = Math.min(totalFactor, settings.getMaxFactorHealth());
 
         drawText(graphics, font, TRACKER_LABELS.computeIfAbsent(dimensionKey,
                 key -> Component.translatable("debug.scalingdifficulty.tracker", key)), x, y, GRAY);
@@ -197,6 +202,14 @@ public class DebugHudOverlay {
         cx = drawText(graphics, font, " -> ", cx, y, DARK_GRAY);
         drawText(graphics, font, "+" + String.format("%.2f", heightBonus), cx, y, GREEN);
         y += step;
+        if (HerosLevelsCompat.shouldApplyLevelFactor(settings)) {
+            cx = drawText(graphics, font, LEVEL_LABEL, x, y, WHITE);
+            cx = drawText(graphics, font, String.valueOf(ScalingDifficulty.isHerosLevelsLoaded
+                    ? HerosLevelsCompat.getClientPlayerLevel(player) : 0), cx, y, GRAY);
+            cx = drawText(graphics, font, " -> ", cx, y, DARK_GRAY);
+            drawText(graphics, font, "+" + String.format("%.2f", levelBonus), cx, y, GREEN);
+            y += step;
+        }
         cx = drawText(graphics, font, NEXT_FACTOR_LABEL, x, y, WHITE);
         drawText(graphics, font, String.format("%.2fx", totalFactor), cx, y, YELLOW);
     }
@@ -247,5 +260,6 @@ public class DebugHudOverlay {
         HEIGHT_LABEL = Component.translatable("debug.scalingdifficulty.height");
         NEXT_FACTOR_LABEL = Component.translatable("debug.scalingdifficulty.next_factor");
         ZONE_LABEL = Component.translatable("debug.scalingdifficulty.zone");
+        LEVEL_LABEL = Component.translatable("debug.scalingdifficulty.level");
     }
 }

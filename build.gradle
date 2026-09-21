@@ -16,6 +16,7 @@ sourceSets.main.resources {
     exclude("src/generated/**/.cache")
 }
 repositories {
+    mavenLocal()
     maven { url = "https://maven.shedaniel.me/" }
     maven { url = "https://maven.terraformersmc.com/" }
     maven { url = "https://api.modrinth.com/maven" }
@@ -74,6 +75,9 @@ configurations {
 dependencies {
     implementation("me.shedaniel.cloth:cloth-config-neoforge:${cloth_config_version}")
     compileOnly("com.herobrot.levelplate:levelplate:${levelplate_version}")
+
+    implementation("com.herobrot.heroslevels:heroslevels:${heroslevels_version}")
+    runtimeOnly("com.herobrot.heroslib:heroslib:1.2.1+1.21.1")
     // runtimeOnly "maven.modrinth:jade:${project.jade_version}"
 
     // Test

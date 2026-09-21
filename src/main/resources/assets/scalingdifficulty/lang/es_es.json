@@ -118,7 +118,8 @@
   "debug.scalingdifficulty.distance": "Distancia: ",
   "debug.scalingdifficulty.time": "Tiempo: ",
   "debug.scalingdifficulty.height": "Altura: ",
-  "debug.scalingdifficulty.next_factor": "Factor estimado del proxied spawn: ",
+  "debug.scalingdifficulty.next_factor": "Factor estimado del próximo spawn: ",
   "debug.scalingdifficulty.zone": "Zona: ",
-  "debug.scalingdifficulty.zone.dimension": "Dimension: %s"
+  "debug.scalingdifficulty.zone.dimension": "Dimensión: %s",
+  "debug.scalingdifficulty.level": "Nivel: "
 }

@@ -1,6 +1,7 @@
 package com.herobrot.scalingdifficulty.api;
 
 import com.herobrot.scalingdifficulty.ScalingDifficulty;
+import com.herobrot.scalingdifficulty.compat.HerosLevelsCompat;
 import com.herobrot.scalingdifficulty.compat.LevelplateCompat;
 import com.herobrot.scalingdifficulty.config.ScalingDifficultyConfig;
 import com.herobrot.scalingdifficulty.data.DimensionDifficultyLoader;
@@ -35,34 +36,36 @@ public class DifficultyCalculator {
         ScalingDifficultyConfig config = ScalingDifficulty.CONFIG;
         String dimensionKey = level.dimension().location().toString();
         DimensionSettings settings = DimensionDifficultyLoader.getSettings(dimensionKey);
-        double factor = settings.startingFactor;
+        double factor = settings.getStartingFactor();
         BlockPos spawnPos = level.getSharedSpawnPos();
-        int spawnX = settings.distanceCoordinatesX != null ? settings.distanceCoordinatesX : spawnPos.getX();
-        int spawnZ = settings.distanceCoordinatesZ != null ? settings.distanceCoordinatesZ : spawnPos.getZ();
+        int spawnX = settings.getDistanceCoordinatesX() != null ? settings.getDistanceCoordinatesX() : spawnPos.getX();
+        int spawnZ = settings.getDistanceCoordinatesZ() != null ? settings.getDistanceCoordinatesZ() : spawnPos.getZ();
         float worldSpawnDistance = Mth.sqrt((float) pos.distToCenterSqr(spawnX, pos.getY(), spawnZ));
         long worldTime = level.getDayTime();
         int spawnHeight = pos.getY();
-        if (settings.increasingDistance != 0) {
-            float distance = worldSpawnDistance - settings.startingDistance;
+        if (settings.getIncreasingDistance() != 0) {
+            float distance = worldSpawnDistance - settings.getStartingDistance();
             if (distance > 0) {
-                if (!isBoss && config.excludeDistanceInOtherDimension && level.dimension() != Level.OVERWORLD) distance = 0;
-                factor += ((double) (int) distance / settings.increasingDistance) * (isBoss ? config.bossDistanceFactor : settings.distanceFactor);
+                if (!isBoss && config.excludeDistanceInOtherDimension && level.dimension() != Level.OVERWORLD)
+                    distance = 0;
+                factor += ((double) (int) distance / settings.getIncreasingDistance()) * (isBoss ? config.bossDistanceFactor : settings.getDistanceFactor());
             }
         }
-        if (settings.increasingTime != 0) {
-            long time = worldTime - (settings.startingTime * TICKS_PER_MINUTE);
+        if (settings.getIncreasingTime() != 0) {
+            long time = worldTime - (settings.getStartingTime() * TICKS_PER_MINUTE);
             if (time > 0) {
                 if (!isBoss && config.excludeTimeInOtherDimension && level.dimension() != Level.OVERWORLD) time = 0;
-                factor += ((int) (time / (settings.increasingTime * TICKS_PER_MINUTE))) * (isBoss ? config.bossTimeFactor : settings.timeFactor);
+                factor += ((int) (time / (settings.getIncreasingTime() * TICKS_PER_MINUTE))) * (isBoss ? config.bossTimeFactor : settings.getTimeFactor());
             }
         }
-        if (!isBoss && settings.heightDistance != 0) {
-            int spawnHeightDivided = (spawnHeight - settings.startingHeight) / settings.heightDistance;
-            if (!settings.positiveHeightIncrement && spawnHeightDivided > 0) spawnHeightDivided = 0;
-            if (!settings.negativeHeightIncrement && spawnHeightDivided < 0) spawnHeightDivided = 0;
+        if (!isBoss && settings.getHeightDistance() != 0) {
+            int spawnHeightDivided = (spawnHeight - settings.getStartingHeight()) / settings.getHeightDistance();
+            if (!settings.isPositiveHeightIncrement() && spawnHeightDivided > 0) spawnHeightDivided = 0;
+            if (!settings.isNegativeHeightIncrement() && spawnHeightDivided < 0) spawnHeightDivided = 0;
             if (config.excludeHeightInOtherDimension && level.dimension() != Level.OVERWORLD) spawnHeightDivided = 0;
-            factor += Math.abs(spawnHeightDivided) * settings.heightFactor;
+            factor += Math.abs(spawnHeightDivided) * settings.getHeightFactor();
         }
+        if (!isBoss && HerosLevelsCompat.shouldApplyLevelFactor(settings)) factor += HerosLevelsCompat.getLevelFactor(level, pos.getX(), pos.getY(), pos.getZ(), settings);
         return (float) factor;
     }
 
@@ -94,9 +97,9 @@ public class DifficultyCalculator {
                     if (!player.isSpectator() && player.distanceToSqr(mob) <= radiusSqr) playersNearby++;
                 if (playersNearby > 1) rawMultiplier += (float) ((playersNearby - 1) * config.dynamicBossModificator);
             }
-            mobHealthFactor = Math.min(rawMultiplier, isBoss ? config.bossMaxFactor : settings.maxFactorHealth);
-            mobDamageFactor = Math.min(rawMultiplier, settings.maxFactorDamage);
-            mobProtectionFactor = Math.min(rawMultiplier, settings.maxFactorProtection);
+            mobHealthFactor = Math.min(rawMultiplier, isBoss ? config.bossMaxFactor : settings.getMaxFactorHealth());
+            mobDamageFactor = Math.min(rawMultiplier, settings.getMaxFactorDamage());
+            mobProtectionFactor = Math.min(rawMultiplier, settings.getMaxFactorProtection());
             if (config.allowRandomValues && level.random.nextFloat() <= (config.randomChance / 100f)) {
                 float rFactor = config.randomFactor / 100f;
                 double randomModifier = 1.0 - rFactor + (level.random.nextDouble() * rFactor * 2f);
@@ -117,7 +120,7 @@ public class DifficultyCalculator {
                 if (level.random.nextFloat() < (config.speedZombieChance / 100f)) {
                     mobHealthFactor -= (config.speedZombieMalusLifePoints / baseHealth);
                     mobSpeedFactor *= config.speedZombieSpeedFactor;
-                    mobSpeedFactor = Math.min(mobSpeedFactor, settings.maxFactorSpeed);
+                    mobSpeedFactor = Math.min(mobSpeedFactor, settings.getMaxFactorSpeed());
                     mob.setData(ModAttachments.SPEEDY_ZOMBIE, true);
                     AttributeHandler.applyModifier(mob, Attributes.SCALE, AttributeHandler.SCALE_MOD_ID, 0.85);
                 } else if (level.random.nextFloat() < (config.bigZombieChance / 100f)) {

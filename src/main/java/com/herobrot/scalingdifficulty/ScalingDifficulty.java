@@ -18,14 +18,22 @@ public class ScalingDifficulty {
     public static final Logger LOGGER = LogManager.getLogger();
     public static ScalingDifficultyConfig CONFIG;
     public static boolean isLevelplateLoaded = false;
+    public static boolean isHerosLevelsLoaded = false;
 
     public ScalingDifficulty(IEventBus modEventBus, ModContainer modContainer) {
         ConfigInit.init();
         CONFIG = ConfigInit.CONFIG;
         ModAttachments.ATTACHMENT_TYPES.register(modEventBus);
-        isLevelplateLoaded = ModList.get().isLoaded("levelplate");
+        verifyingMods();
         if (FMLEnvironment.dist.isClient()) ClientEvents.registerConfigScreen(modContainer);
     }
+
+    private void verifyingMods() {
+        isLevelplateLoaded = isModLoaded("levelplate");
+        isHerosLevelsLoaded = isModLoaded("heroslevels");
+    }
+
+    private static boolean isModLoaded(String modId) { return ModList.get().isLoaded(modId); }
 
     public static String getModVersion() {
         return ModList.get().getModContainerById(ScalingDifficulty.MOD_ID)
