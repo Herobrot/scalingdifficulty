@@ -28,7 +28,9 @@ repositories {
     mavenLocal()
     maven { url = "https://maven.shedaniel.me/" }
     maven { url = "https://api.modrinth.com/maven" }
+    maven { url = "https://maven.terraformersmc.com/" }
     mavenCentral()
+    //flatDir {dirs "libs"} using only with Hero's Levels
 }
 
 base {
@@ -118,9 +120,9 @@ tasks.named('processResources', ProcessResources) {
             mod_name               : mod_name,
             mod_license            : mod_license,
             mod_version            : version,
-            cloth_config_version   : "[${cloth_config_version},)",
-            levelplate_version     : "[${levelplate_version},)",
-            heroslevels_version    : "[${heroslevels_version},)"
+            cloth_config_version   : cloth_config_version,
+            levelplate_version     : levelplate_version,
+            heroslevels_version    : heroslevels_version
     ]
     inputs.properties(replaceProperties)
     filesMatching('META-INF/neoforge.mods.toml') {
