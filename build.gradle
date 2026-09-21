@@ -174,7 +174,6 @@ def gitCommit = providers.exec {
 
 def modVersion = version.toString()
 def modName = mod_name.toString()
-
 if (providers.gradleProperty('build.release').isPresent()) {
     publishMods {
         dryRun = providers.gradleProperty('build.release.dryrun').isPresent()
@@ -220,3 +219,7 @@ if (providers.gradleProperty('build.release').isPresent()) {
     }
 } else if (gradle.startParameter.taskNames.any { it.endsWith('publishMods') })
     throw new GradleException("publishMods requiere -Pbuild.release=true (usa -Pbuild.release.dryrun=true para prueba)")
+
+tasks.named('publishMods') {
+    outputs.upToDateWhen { false }
+}
