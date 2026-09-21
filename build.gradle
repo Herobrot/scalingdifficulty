@@ -1,87 +1,104 @@
 plugins {
     id 'java-library'
     id 'maven-publish'
-    id 'net.neoforged.moddev' version '2.0.141'
+    id 'net.neoforged.moddev' version '2.0.147'
     id 'idea'
     id "me.modmuss50.mod-publish-plugin" version "2.1.1"
 }
+
 tasks.named('wrapper', Wrapper).configure {
     distributionType = Wrapper.DistributionType.BIN
 }
-version = mod_version
+
+def releaseType = release_type.toString()
+if (!(releaseType in ['release', 'beta', 'alpha']))
+    throw new GradleException("release_type invalido: '$release_type' (release|beta|alpha)")
+def typeSuffix = releaseType == 'release' ? '' : "-${releaseType.toUpperCase()}"
+
+version = "${mod_version}+${minecraft_version}${typeSuffix}"
 group = mod_group_id
+
 sourceSets.main.resources {
     srcDir('src/generated/resources')
     exclude("**/*.bbmodel")
     exclude("src/generated/**/.cache")
 }
+
 repositories {
     mavenLocal()
     maven { url = "https://maven.shedaniel.me/" }
-    maven { url = "https://maven.terraformersmc.com/" }
     maven { url = "https://api.modrinth.com/maven" }
-    maven { url = "https://maven.theillusivec4.top/" }
     mavenCentral()
-    flatDir {
-        dirs("libs")
-    }
 }
+
 base {
     archivesName = mod_id
 }
+
 java.toolchain.languageVersion = JavaLanguageVersion.of(21)
+
 neoForge {
     version = project.neo_version
+
     parchment {
         mappingsVersion = project.parchment_mappings_version
         minecraftVersion = project.parchment_minecraft_version
     }
+
     java {
         withSourcesJar()
     }
+
     accessTransformers = project.files('src/main/resources/META-INF/accesstransformer.cfg')
+
     runs {
         client {
             client()
             systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
         }
+
         server {
             server()
             programArgument '--nogui'
             systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
         }
+
         gameTestServer {
             type = "gameTestServer"
             systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
         }
+
         data {
             data()
             programArguments.addAll '--mod', project.mod_id, '--all', '--output', file('src/generated/resources/').getAbsolutePath(), '--existing', file('src/main/resources/').getAbsolutePath()
         }
+
         configureEach {
-            systemProperty 'forge.logging.markers', 'REGISTRIES'
             logLevel = org.slf4j.event.Level.DEBUG
+            systemProperty 'forge.logging.markers', 'REGISTRIES'
         }
     }
+
     mods {
         "${mod_id}" {
             sourceSet(sourceSets.main)
         }
     }
 }
+
 configurations {
     runtimeClasspath.extendsFrom localRuntime
 }
+
 dependencies {
     implementation("me.shedaniel.cloth:cloth-config-neoforge:${cloth_config_version}")
     compileOnly("com.herobrot.levelplate:levelplate:${levelplate_version}")
+    compileOnly("com.herobrot.heroslevels:heroslevels:${heroslevels_version}")
+    //runtimeOnly("com.herobrot.heroslib:heroslib:1.2.1+1.21.1")
 
-    implementation("com.herobrot.heroslevels:heroslevels:${heroslevels_version}")
-    runtimeOnly("com.herobrot.heroslib:heroslib:1.2.1+1.21.1")
     // runtimeOnly "maven.modrinth:jade:${project.jade_version}"
 
     // Test
-    //implementation("com.herobrot.levelplate:levelplate:${levelplate_version}")
     // l_enders-cataclysm
     //runtimeOnly("maven.modrinth:46KJle7n:695vQRhD")
     // lionfish ^^^^^^ dependecy
@@ -89,16 +106,21 @@ dependencies {
     //runtimeOnly "top.theillusivec4.curios:curios-neoforge:9.5.1+1.21.1"
     //compileOnly "top.theillusivec4.curios:curios-neoforge:9.5.1+1.21.1:api"
 }
+
 tasks.named('processResources', ProcessResources) {
     var replaceProperties = [
             minecraft_version      : minecraft_version,
             minecraft_version_range: minecraft_version_range,
             neo_version            : neo_version,
+            neo_version_range      : "[${neo_version},)",
             loader_version_range   : loader_version_range,
             mod_id                 : mod_id,
             mod_name               : mod_name,
             mod_license            : mod_license,
-            mod_version            : mod_version
+            mod_version            : version,
+            cloth_config_version   : "[${cloth_config_version},)",
+            levelplate_version     : "[${levelplate_version},)",
+            heroslevels_version    : "[${heroslevels_version},)"
     ]
     inputs.properties(replaceProperties)
     filesMatching('META-INF/neoforge.mods.toml') {
@@ -143,37 +165,51 @@ def getChangelogText() {
     }
     return text.trim()
 }
-publishMods {
-    file = jar.archiveFile
-    changelog = getChangelogText()
-    type = STABLE
-    modLoaders.add("neoforge")
-    curseforge {
-        accessToken = providers.environmentVariable("CURSEFORGE_TOKEN")
-        projectId = curseforge_id
-        minecraftVersions.add(minecraft_version)
-        javaVersions.add(JavaVersion.VERSION_21)
-        client = true
-        server = true
-        requires("cloth-config")
-        optional("levelplate")
-        changelogType = "markdown"
-        displayName = "${jar.archiveFileName.get()}+${minecraft_version}"
-    }
-    modrinth {
-        accessToken = providers.environmentVariable("MODRINTH_TOKEN")
-        projectId = modrinth_id
-        minecraftVersions.add(minecraft_version)
-        requires("cloth-config")
-        environment = SERVER_ONLY_CLIENT_OPTIONAL
-        version = "${mod_version}+${minecraft_version}"
-    }
-    github {
-        accessToken = providers.environmentVariable("GITHUB_TOKEN")
-        repository = "Herobrot/${mod_id}"
-        tagName="${mod_version}+${minecraft_version}"
-        displayName = "${mod_name} ${mod_version}+${minecraft_version}"
-        commitish = "1.21"
-        additionalFiles.from(tasks.named("sourcesJar"))
+
+def gitCommit = providers.exec {
+    commandLine('git', 'rev-parse', '--short', 'HEAD')
+}.standardOutput.asText.map { it.trim() }
+
+if (providers.gradleProperty('build.release').isPresent()) {
+    publishMods {
+        dryRun = providers.gradleProperty('build.release.dryrun').isPresent()
+
+        file = jar.archiveFile
+        changelog = getChangelogText()
+        type = releaseType == 'alpha' ? ALPHA : releaseType == 'beta' ? BETA : STABLE
+        modLoaders.add("neoforge")
+
+        curseforge {
+            accessToken = providers.environmentVariable("CURSEFORGE_TOKEN")
+            projectId = curseforge_id
+            minecraftVersions.add(minecraft_version)
+            javaVersions.add(JavaVersion.VERSION_21)
+            client = true
+            server = true
+            requires("cloth-config")
+            optional("levelplate")
+            optional("heros-levels")
+            changelogType = "markdown"
+            displayName = "${mod_name} ${version}"
+            version = "${version}"
+        }
+        modrinth {
+            accessToken = providers.environmentVariable("MODRINTH_TOKEN")
+            projectId = modrinth_id
+            minecraftVersions.add(minecraft_version)
+            requires("cloth-config")
+            optional("levelplate")
+            environment = SERVER_ONLY_CLIENT_OPTIONAL
+            version = "${version}"
+        }
+        github {
+            accessToken = providers.environmentVariable("GITHUB_TOKEN")
+            repository = "Herobrot/${mod_id}"
+            tagName = "${version}"
+            displayName = "${mod_name} ${version}"
+            commitish = gitCommit
+            version = "${version}"
+            additionalFiles.from(tasks.named("sourcesJar"))
+        }
     }
 }

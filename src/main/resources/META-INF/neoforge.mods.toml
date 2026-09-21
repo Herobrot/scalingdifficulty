@@ -32,8 +32,22 @@ ordering="NONE"
 side="BOTH"
 
 [[dependencies."${mod_id}"]]
-modId="cloth_config"
-type="required"
-versionRange="[15.0,)"
-ordering="AFTER"
-side="BOTH"
+modId = "cloth-config"
+type = "required"
+versionRange = "[${cloth_config_version},)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies."${mod_id}"]]
+modId = "levelplate"
+type = "optional"
+versionRange = "[${levelplate_version},)"
+ordering = "NONE"
+side = "SERVER"
+
+[[dependencies."${mod_id}"]]
+modId = "heroslevels"
+type = "optional"
+versionRange = "[${heroslevels_version},)"
+ordering = "NONE"
+side = "SERVER"
