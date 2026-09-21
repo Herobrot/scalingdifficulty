@@ -205,6 +205,7 @@ if (providers.gradleProperty('build.release').isPresent()) {
             requires("cloth-config")
             optional("levelplate")
             environment = SERVER_ONLY_CLIENT_OPTIONAL
+            displayName = "${modName} ${modVersion}"
             version = modVersion
         }
         github {
@@ -217,5 +218,5 @@ if (providers.gradleProperty('build.release').isPresent()) {
             additionalFiles.from(tasks.named("sourcesJar"))
         }
     }
-} else if (gradle.startParameter.taskNames.any { it.endswith('publishMods') })
+} else if (gradle.startParameter.taskNames.any { it.endsWith('publishMods') })
     throw new GradleException("publishMods requiere -Pbuild.release=true (usa -Pbuild.release.dryrun=true para prueba)")
