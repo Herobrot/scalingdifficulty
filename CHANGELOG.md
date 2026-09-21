@@ -1,3 +1,15 @@
+# 1.1.0+1.21.1
+## Added:
+- Port of the Zone feature from original mod
+  - Added a visual render debug for the zones
+  - Added an event when entering a Zone
+- Added Hero's Levels compat
+## Fixed:
+- Fixed not applying the config in-game because it was necessary a /reload
+## Changed:
+- From the port, the commands now have a list of suggestions when trying to remove a zone
+- Internal differences, same feature
+---
 # 1.0.3
 ## Added:
 - Rework of the extra loot
