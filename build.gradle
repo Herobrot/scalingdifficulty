@@ -30,7 +30,7 @@ repositories {
     maven { url = "https://api.modrinth.com/maven" }
     maven { url = "https://maven.terraformersmc.com/" }
     mavenCentral()
-    //flatDir {dirs "libs"} using only with Hero's Levels
+    flatDir {dirs "libs"}
 }
 
 base {
@@ -94,7 +94,7 @@ configurations {
 
 dependencies {
     implementation("me.shedaniel.cloth:cloth-config-neoforge:${cloth_config_version}")
-    compileOnly("com.herobrot.levelplate:levelplate:${levelplate_version}")
+    compileOnly("maven.modrinth:levelplate:${levelplate_version}")
     compileOnly("com.herobrot.heroslevels:heroslevels:${heroslevels_version}")
     //runtimeOnly("com.herobrot.heroslib:heroslib:1.2.1+1.21.1")
 
