@@ -18,6 +18,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.phys.Vec3;
 
 import java.util.List;
 import java.util.UUID;
@@ -64,7 +65,9 @@ public class DifficultyZoneCommand {
                                 .then(Commands.literal("id")
                                         .then(Commands.argument("uuid", UuidArgument.uuid())
                                                 .suggests(ZONE_IDS_SUGGESTIONS)
-                                                .executes(DifficultyZoneCommand::removeById))))
+                                                .executes(DifficultyZoneCommand::removeById)))
+                                .then(Commands.literal("here")
+                                        .executes(DifficultyZoneCommand::removeHere)))
                         .then(Commands.literal("list")
                                 .executes(DifficultyZoneCommand::list))));
     }
@@ -150,6 +153,26 @@ public class DifficultyZoneCommand {
         source.sendFailure(plain(source, "command.scalingdifficulty.zone.not_found",
                 "No difficulty zone matching '%s' was found.", uuid.toString()));
         return 0;
+    }
+
+    private static int removeHere(CommandContext<CommandSourceStack> context) {
+        CommandSourceStack source = context.getSource();
+        Vec3 pos = source.getPosition();
+        String dimension = source.getLevel().dimension().location().toString();
+
+        DifficultyZone zone = DifficultyZoneSavedData.get(source.getServer())
+                .findZone(dimension, pos.x, pos.y, pos.z);
+
+        if (zone == null) {
+            source.sendFailure(plain(source, "command.scalingdifficulty.zone.not_here",
+                    "You are not inside any difficulty zone."));
+            return 0;
+        }
+
+        DifficultyZoneSavedData.get(source.getServer()).removeZone(zone.getId());
+        ZoneSyncManager.syncToAll(source.getServer());
+        sendRemoved(source, zone);
+        return 1;
     }
 
     private static boolean nameExists(MinecraftServer server, String name) {
