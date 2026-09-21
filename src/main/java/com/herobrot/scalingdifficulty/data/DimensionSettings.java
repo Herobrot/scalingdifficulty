@@ -7,11 +7,6 @@ import net.minecraft.util.GsonHelper;
 
 import javax.annotation.Nullable;
 
-/**
- * Ajustes de dificultad para una dimension. Solo almacena los valores que el
- * datapack define explicitamente; los getters resuelven contra la config
- * global en vivo, permitiendo cambios en caliente de esta ultima.
- */
 public class DimensionSettings {
 
     @Nullable private final Integer distanceCoordinatesX;
@@ -76,10 +71,10 @@ public class DimensionSettings {
     private static ScalingDifficultyConfig config() { return ScalingDifficulty.CONFIG; }
 
     @Nullable
-    public Integer getDistanceCoordinatesX() { return distanceCoordinatesX != null ? distanceCoordinatesX : null; }
+    public Integer getDistanceCoordinatesX() { return distanceCoordinatesX; }
 
     @Nullable
-    public Integer getDistanceCoordinatesZ() { return distanceCoordinatesZ != null ? distanceCoordinatesZ : null; }
+    public Integer getDistanceCoordinatesZ() { return distanceCoordinatesZ; }
 
     public int getIncreasingDistance() { return increasingDistance != null ? increasingDistance : config().increasingDistance; }
 

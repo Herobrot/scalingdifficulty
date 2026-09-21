@@ -9,10 +9,6 @@ import net.minecraft.world.entity.player.Player;
 
 public class HerosLevelsCompat {
 
-    public static double getLevelFactor(ServerLevel level, double x, double y, double z, DimensionSettings settings) {
-        return getAveragePlayerLevel(level, x, y, z, settings.getPlayerRadius()) * settings.getLevelFactor();
-    }
-
     public static double getAveragePlayerLevel(ServerLevel level, double x, double y, double z, double radius) {
         int count = 0;
         long total = 0;

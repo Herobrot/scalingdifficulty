@@ -65,7 +65,7 @@ public class DifficultyCalculator {
             if (config.excludeHeightInOtherDimension && level.dimension() != Level.OVERWORLD) spawnHeightDivided = 0;
             factor += Math.abs(spawnHeightDivided) * settings.getHeightFactor();
         }
-        if (!isBoss && HerosLevelsCompat.shouldApplyLevelFactor(settings)) factor += HerosLevelsCompat.getLevelFactor(level, pos.getX(), pos.getY(), pos.getZ(), settings);
+        if (!isBoss && HerosLevelsCompat.shouldApplyLevelFactor(settings)) factor += HerosLevelsCompat.getAveragePlayerLevel(level, pos.getX(), pos.getY(), pos.getZ(), settings.getPlayerRadius()) * settings.getLevelFactor();
         return (float) factor;
     }
 

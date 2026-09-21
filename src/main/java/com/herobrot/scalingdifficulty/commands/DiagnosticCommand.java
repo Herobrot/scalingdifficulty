@@ -7,6 +7,7 @@ import com.herobrot.scalingdifficulty.compat.LevelplateCompat;
 import com.herobrot.scalingdifficulty.data.DimensionDifficultyLoader;
 import com.herobrot.scalingdifficulty.data.DimensionSettings;
 import com.herobrot.scalingdifficulty.data.ModAttachments;
+import com.herobrot.scalingdifficulty.util.EntityTags;
 import com.mojang.brigadier.CommandDispatcher;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
@@ -59,13 +60,11 @@ public class DiagnosticCommand {
                     message.append(formatLine("Mob: ", mobId.toString()));
                     message.append(formatLine("Multiplier (Data): ", String.valueOf(multiplier)));
 
-                    if (isBigZombie)
-                        message.append(formatLine("Big Zombie: "));
-                    if (isSpeedyZombie)
-                        message.append(formatLine("Speedy Zombie: "));
+                    if (isBigZombie) message.append(formatLine("Big Zombie: "));
+                    if (isSpeedyZombie) message.append(formatLine("Speedy Zombie: "));
 
                     message.append(formatLineHealth(mob.getHealth(), mob.getMaxHealth()));
-                    if (ScalingDifficulty.isHerosLevelsLoaded && !mob.getData(ModAttachments.IN_ZONE)) {
+                    if (ScalingDifficulty.isHerosLevelsLoaded && !mob.getData(ModAttachments.IN_ZONE) && !mob.getType().is(EntityTags.BOSSES)) {
                         ServerLevel serverLevel = player.serverLevel();
                         DimensionSettings settings = DimensionDifficultyLoader.getSettings(
                                 serverLevel.dimension().location().toString());

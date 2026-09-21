@@ -20,15 +20,10 @@ public class AttributeHandler {
         AttributeInstance instance = mob.getAttribute(attribute);
         if (instance != null) {
             double amount = factor - 1.0D;
-            
             if (Math.abs(amount) < 0.001D) return;
-
             instance.removeModifier(id);
             instance.addPermanentModifier(new AttributeModifier(id, amount, AttributeModifier.Operation.ADD_MULTIPLIED_BASE));
-
-            if (attribute.equals(Attributes.MAX_HEALTH)) {
-                mob.setHealth(mob.getMaxHealth());
-            }
+            if (attribute.equals(Attributes.MAX_HEALTH)) mob.setHealth(mob.getMaxHealth());
         }
     }
 }

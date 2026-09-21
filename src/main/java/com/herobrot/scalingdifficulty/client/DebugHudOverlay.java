@@ -204,8 +204,7 @@ public class DebugHudOverlay {
         y += step;
         if (HerosLevelsCompat.shouldApplyLevelFactor(settings)) {
             cx = drawText(graphics, font, LEVEL_LABEL, x, y, WHITE);
-            cx = drawText(graphics, font, String.valueOf(ScalingDifficulty.isHerosLevelsLoaded
-                    ? HerosLevelsCompat.getClientPlayerLevel(player) : 0), cx, y, GRAY);
+            cx = drawText(graphics, font, String.valueOf(HerosLevelsCompat.getClientPlayerLevel(player)), cx, y, GRAY);
             cx = drawText(graphics, font, " -> ", cx, y, DARK_GRAY);
             drawText(graphics, font, "+" + String.format("%.2f", levelBonus), cx, y, GREEN);
             y += step;

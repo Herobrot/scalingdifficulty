@@ -90,7 +90,6 @@ public class ScalingDifficultyConfig implements ConfigData {
     @ConfigEntry.Gui.RequiresRestart
     public boolean devMode = false;
 
-
     @ConfigEntry.Category("monster_setting")
     public boolean allowSpecialZombie = true;
     @ConfigEntry.Category("monster_setting")
