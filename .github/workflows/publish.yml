@@ -82,9 +82,9 @@ jobs:
       - name: Grant Execute Permissions to Gradlew
         run: chmod +x gradlew
 
-      - name: Build and Deploy to Endpoints
+      - name: Publish to GitHub, Modrinth and CurseForge
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           CURSEFORGE_TOKEN: ${{ secrets.CURSEFORGE_TOKEN }}
           MODRINTH_TOKEN: ${{ secrets.MODRINTH_TOKEN }}
-        run: ./gradlew publishMods -Prelease_type=release --no-configuration-cache
+        run: ./gradlew publishMods -Pbuild.release=true --no-configuration-cache

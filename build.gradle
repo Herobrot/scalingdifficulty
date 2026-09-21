@@ -217,4 +217,5 @@ if (providers.gradleProperty('build.release').isPresent()) {
             additionalFiles.from(tasks.named("sourcesJar"))
         }
     }
-}
+} else if (gradle.startParameter.taskNames.any { it.endswith('publishMods') })
+    throw new GradleException("publishMods requiere -Pbuild.release=true (usa -Pbuild.release.dryrun=true para prueba)")
