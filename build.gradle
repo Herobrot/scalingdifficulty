@@ -170,6 +170,9 @@ def gitCommit = providers.exec {
     commandLine('git', 'rev-parse', '--short', 'HEAD')
 }.standardOutput.asText.map { it.trim() }
 
+def modVersion = version.toString()
+def modName = mod_name.toString()
+
 if (providers.gradleProperty('build.release').isPresent()) {
     publishMods {
         dryRun = providers.gradleProperty('build.release.dryrun').isPresent()
@@ -190,8 +193,8 @@ if (providers.gradleProperty('build.release').isPresent()) {
             optional("levelplate")
             optional("heros-levels")
             changelogType = "markdown"
-            displayName = "${mod_name} ${version}"
-            version = "${version}"
+            displayName = "${modName} ${modVersion}"
+            version = modVersion
         }
         modrinth {
             accessToken = providers.environmentVariable("MODRINTH_TOKEN")
@@ -200,15 +203,15 @@ if (providers.gradleProperty('build.release').isPresent()) {
             requires("cloth-config")
             optional("levelplate")
             environment = SERVER_ONLY_CLIENT_OPTIONAL
-            version = "${version}"
+            version = modVersion
         }
         github {
             accessToken = providers.environmentVariable("GITHUB_TOKEN")
             repository = "Herobrot/${mod_id}"
-            tagName = "${version}"
-            displayName = "${mod_name} ${version}"
+            tagName = modVersion
+            displayName = "${modName} ${modVersion}"
             commitish = gitCommit
-            version = "${version}"
+            version = modVersion
             additionalFiles.from(tasks.named("sourcesJar"))
         }
     }
