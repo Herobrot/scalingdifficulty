@@ -1,6 +1,8 @@
 # ScalingDifficulty
 ScalingDifficulty is a mod and a **port** of [RpgDifficulty](https://github.com/Globox1997/RpgDifficulty) from **Globox** that dynamically strengthens mobs over time, distance, and height, ensuring the game's challenge scales naturally as you progress through your world.
 
+## IMPORTANT
+This mod and other ports of mine is going to be **maintenance only**. I made this decision to focus on personal project and also, because Globox already made a NeoForge port but for 26.3 
 
 ### Installation
 ScalingDifficulty is built for [NeoForge](https://neoforged.net/). It requires the [Cloth Config API](https://modrinth.com/mod/cloth-config) to be installed separately in your mods folder.
@@ -66,7 +68,24 @@ Settings that can be modified per-dimension:
 - startingTime  
 - startingHeight  
 - positiveHeightIncrement  
-- negativeHeightIncrement  
+- negativeHeightIncrement
+
+**[NEW]** Only for this port:
+- allowSpecialZombie
+- bigZombieChance
+- bigZombieSlownessFactor
+- bigZombieBonusLifePoints
+- bigZombieBonusDamage
+- bigZombieSize
+- speedZombieChance
+- speedZombieSpeedFactor
+- speedZombieMalusLifePoints
+- dynamicBossModification
+- dynamicBossModificator
+- bossMaxFactor
+- bossDistanceFactor
+- bossTimeFactor
+- bossDistance
 
 Example (`data/scalingdifficulty/difficulty/nether.json`):
 ```json
@@ -87,22 +106,29 @@ Example (`data/scalingdifficulty/difficulty/nether.json`):
     "startingTime": 0,
     "startingHeight": 62,
     "positiveHeightIncrement": true,
-    "negativeHeightIncrement": true
+    "negativeHeightIncrement": true,
+    "allowSpecialZombie": true,
+    "bigZombieChance": 10,
+    "bigZombieSlownessFactor": 0.7,
+    "bigZombieBonusLifePoints": 10,
+    "bigZombieBonusDamage": 2,
+    "bigZombieSize": 1.3,
+    "speedZombieChance": 10,
+    "speedZombieSpeedFactor": 1.3,
+    "speedZombieMalusLifePoints": 10,
+    "dynamicBossModification": true,
+    "dynamicBossModificator": 1.0,
+    "bossMaxFactor": 3.0,
+    "bossDistanceFactor": 0.05,
+    "bossTimeFactor": 0.1,
+    "bossDistance": 256.0
 }
 ```
 ## FAQ
 ### Q: Will it be a 1:1 version of the Fabric version?
 Yes and no. For now, it'll stay that way, but I plan to do my own thing while trying to keep it simple.
 ### Q: What are your plans?
-Adding more mechanics like:
-- Creeper when can't reach the player but is in sight, still explodes but they fire off its head like a wither skull and explodes to the player
-- Spiders shooting web-spiders to slow the player
-- Skeletons do a shotgun-spread or rapid-fire every X time it shoot an arrow
-- Adding a extra mob factor, for example:
-  - Passive mobs scaling the same
-  - But hostile mobs maybe gets an extra "0.2x" so, with Levelplate, appears Pigs with Lv 1 but Zombies already Lv 3
-- And other mechanics if i get a better idea
-So in summary, adding mechanics and just not making the difficulty in numbers
+Gone, reduced to atoms. ;)
 ### Q: Do you have permission?
 Yes!!! I talked to Globox on Discord.
 ### Q: What happens to StereoWalker?
@@ -111,13 +137,4 @@ Yes!!! I talked to Globox on Discord.
 Basically, StereoWalker has been missing for 8 months. I sent him an email on April 28, but as of this writing, I haven't received a reply.
 
 ### Q: Will you create a port for each Globox mod?
-Yes and no, again.
-
-I definitely plan to develop a port for the following mods:
-- Rpgdifficulty (This One finish!!!!)
-- TieredZ ([Finish!!11!](https://github.com/Herobrot/tieredneo))
-- LevelZ ([IN PROGRESS](https://github.com/Herobrot/heroslevels))
-- Nameplate ([FINISH!](https://github.com/Herobrot/levelplate))
-- TravelerZ ([FINISH! :D](https://github.com/Herobrot/expedition))
-
-The other mods aren't my priority... And also because I've never tried or played them in the first place, but maybe if I get enough support, I might end up learning them and creating a proper port.
+I have already published all the ports that I was interested in ^^ And I don't have plans to make more.
