@@ -24,15 +24,28 @@ jobs:
           TAG="${GITHUB_REF#refs/tags/}"
           VERSION=$(grep '^mod_version=' gradle.properties | cut -d'=' -f2)
           MC_VERSION=$(grep '^minecraft_version=' gradle.properties | cut -d'=' -f2)
-          EXPECTED_TAG="${VERSION}+${MC_VERSION}"
+          RELEASE_TYPE=$(grep '^release_type=' gradle.properties | cut -d'=' -f2)
+
+          if [[ ! "$RELEASE_TYPE" =~ ^(release|beta|alpha)$ ]]; then
+            echo "::error::release_type invalido: '$RELEASE_TYPE' (release|beta|alpha)."
+            exit 1
+          fi
+
+          if [[ "$RELEASE_TYPE" == "release" ]]; then
+            SUFFIX=""
+          else
+            SUFFIX="-${RELEASE_TYPE^^}"
+          fi
+          EXPECTED_TAG="${VERSION}+${MC_VERSION}${SUFFIX}"
 
           echo "Tag detectado: $TAG"
           echo "mod_version en gradle.properties: $VERSION"
+          echo "release_type en gradle.properties: $RELEASE_TYPE"
           echo "Tag esperado según gradle.properties: $EXPECTED_TAG"
 
           if [[ "$TAG" != "$EXPECTED_TAG" ]]; then
-            echo "::error::El tag '$TAG' no coincide con el mod_version del commit ($EXPECTED_TAG)."
-            echo "::error::Probablemente el tag apunta a un commit distinto al de 'release ${VERSION}'."
+            echo "::error::El tag '$TAG' no coincide con el tag esperado ($EXPECTED_TAG)."
+            echo "::error::Probablemente el tag apunta a un commit distinto al de 'release ${VERSION}', o el sufijo no corresponde al release_type."
             exit 1
           fi
 
@@ -82,9 +95,35 @@ jobs:
       - name: Grant Execute Permissions to Gradlew
         run: chmod +x gradlew
 
-      - name: Publish to GitHub, Modrinth and CurseForge
+      - name: Build and Deploy to Endpoints
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           CURSEFORGE_TOKEN: ${{ secrets.CURSEFORGE_TOKEN }}
           MODRINTH_TOKEN: ${{ secrets.MODRINTH_TOKEN }}
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
         run: ./gradlew publishMods -Pbuild.release=true -PgitCommit=${{ github.sha }} --no-configuration-cache
+
+      - name: Read latest changelog section
+        id: changelog
+        run: |
+          {
+            echo 'content<<EOF'
+            awk 'NR==1{next} /^---/{exit} /^# /{exit} /^## /{sub(/^## /,""); print "**" $0 "**"; next} {print}' CHANGELOG.md
+            echo 'EOF'
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Discord webhook
+        uses: tsickert/discord-webhook@v5.3.0
+        with:
+          webhook-url: ${{ secrets.DISCORD_WEBHOOK }}
+          embed-title: "¡Scaling Difficulty ${{ needs.validate.outputs.tag }} ha sido publicado!"
+          embed-thumbnail-url: "https://cdn.modrinth.com/data/Aht35CBK/b10373e8c880357cc887041e4e1f23c8e1b69aeb_96.webp"
+          embed-description: |
+            **Changelog**
+            ${{ steps.changelog.outputs.content }}
+            **¿Donde lo descargo?**
+            <:1571050157196447774> https://modrinth.com/mod/scalingdifficulty
+            <:1571050291451797564> https://www.curseforge.com/minecraft/mc-mods/scaling-difficulty
+            <:1571050553490940044> https://github.com/Herobrot/scalingdifficulty/releases/tag/${{ needs.validate.outputs.tag }}
+          embed-color: 0x25f045
+          embed-timestamp: ${{ github.event.head_commit.timestamp }}
