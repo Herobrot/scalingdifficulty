@@ -48,14 +48,14 @@ public class DifficultyCalculator {
             if (distance > 0) {
                 if (!isBoss && config.excludeDistanceInOtherDimension && level.dimension() != Level.OVERWORLD)
                     distance = 0;
-                factor += ((double) (int) distance / settings.getIncreasingDistance()) * (isBoss ? config.bossDistanceFactor : settings.getDistanceFactor());
+                factor += ((double) (int) distance / settings.getIncreasingDistance()) * (isBoss ? settings.getBossDistanceFactor() : settings.getDistanceFactor());
             }
         }
         if (settings.getIncreasingTime() != 0) {
             long time = worldTime - (settings.getStartingTime() * TICKS_PER_MINUTE);
             if (time > 0) {
                 if (!isBoss && config.excludeTimeInOtherDimension && level.dimension() != Level.OVERWORLD) time = 0;
-                factor += ((int) (time / (settings.getIncreasingTime() * TICKS_PER_MINUTE))) * (isBoss ? config.bossTimeFactor : settings.getTimeFactor());
+                factor += ((int) (time / (settings.getIncreasingTime() * TICKS_PER_MINUTE))) * (isBoss ? settings.getBossTimeFactor() : settings.getTimeFactor());
             }
         }
         if (!isBoss && settings.getHeightDistance() != 0) {
@@ -90,14 +90,14 @@ public class DifficultyCalculator {
             mobProtectionFactor = zone.getFactor();
         } else {
             float rawMultiplier = calculateRawMultiplier(level, mob.blockPosition(), isBoss);
-            if (isBoss && config.dynamicBossModification) {
+            if (isBoss && settings.isDynamicBossModification()) {
                 int playersNearby = 0;
-                double radiusSqr = config.bossDistance * config.bossDistance;
+                double radiusSqr = settings.getBossDistance() * settings.getBossDistance();
                 for (ServerPlayer player : level.players())
                     if (!player.isSpectator() && player.distanceToSqr(mob) <= radiusSqr) playersNearby++;
-                if (playersNearby > 1) rawMultiplier += (float) ((playersNearby - 1) * config.dynamicBossModificator);
+                if (playersNearby > 1) rawMultiplier += (float) ((playersNearby - 1) * settings.getDynamicBossModificator());
             }
-            mobHealthFactor = Math.min(rawMultiplier, isBoss ? config.bossMaxFactor : settings.getMaxFactorHealth());
+            mobHealthFactor = Math.min(rawMultiplier, isBoss ? settings.getBossMaxFactor() : settings.getMaxFactorHealth());
             mobDamageFactor = Math.min(rawMultiplier, settings.getMaxFactorDamage());
             mobProtectionFactor = Math.min(rawMultiplier, settings.getMaxFactorProtection());
             if (config.allowRandomValues && level.random.nextFloat() <= (config.randomChance / 100f)) {
@@ -114,24 +114,24 @@ public class DifficultyCalculator {
         mob.setData(ModAttachments.DIFFICULTY_MULTIPLIER, (float) mobHealthFactor);
         mob.setData(ModAttachments.IN_ZONE, zone != null);
 
-        if (zone == null && config.allowSpecialZombie && !mob.isBaby() && mob instanceof Zombie) {
+        if (zone == null && settings.isAllowSpecialZombie() && !mob.isBaby() && mob instanceof Zombie) {
             double baseHealth = mob.getAttributeBaseValue(Attributes.MAX_HEALTH);
             if (baseHealth > 0) {
-                if (level.random.nextFloat() < (config.speedZombieChance / 100f)) {
-                    mobHealthFactor -= (config.speedZombieMalusLifePoints / baseHealth);
-                    mobSpeedFactor *= config.speedZombieSpeedFactor;
+                if (level.random.nextFloat() < (settings.getSpeedZombieChance() / 100f)) {
+                    mobHealthFactor -= (settings.getSpeedZombieMalusLifePoints() / baseHealth);
+                    mobSpeedFactor *= settings.getSpeedZombieSpeedFactor();
                     mobSpeedFactor = Math.min(mobSpeedFactor, settings.getMaxFactorSpeed());
                     mob.setData(ModAttachments.SPEEDY_ZOMBIE, true);
                     AttributeHandler.applyModifier(mob, Attributes.SCALE, AttributeHandler.SCALE_MOD_ID, 0.85);
-                } else if (level.random.nextFloat() < (config.bigZombieChance / 100f)) {
-                    mobSpeedFactor *= config.bigZombieSlownessFactor;
-                    double healthBonusFactor = config.bigZombieBonusLifePoints / baseHealth;
+                } else if (level.random.nextFloat() < (settings.getBigZombieChance() / 100f)) {
+                    mobSpeedFactor *= settings.getBigZombieSlownessFactor();
+                    double healthBonusFactor = settings.getBigZombieBonusLifePoints() / baseHealth;
                     double baseDamage = mob.getAttributeBaseValue(Attributes.ATTACK_DAMAGE);
-                    double damageBonusFactor = baseDamage > 0 ? (config.bigZombieBonusDamage / baseDamage) : 0.0;
+                    double damageBonusFactor = baseDamage > 0 ? (settings.getBigZombieBonusDamage() / baseDamage) : 0.0;
                     mobHealthFactor += healthBonusFactor;
                     mobDamageFactor += damageBonusFactor;
                     mob.setData(ModAttachments.BIG_ZOMBIE, true);
-                    AttributeHandler.applyModifier(mob, Attributes.SCALE, AttributeHandler.SCALE_MOD_ID, config.bigZombieSize);
+                    AttributeHandler.applyModifier(mob, Attributes.SCALE, AttributeHandler.SCALE_MOD_ID, settings.getBigZombieSize());
                 }
             }
         }

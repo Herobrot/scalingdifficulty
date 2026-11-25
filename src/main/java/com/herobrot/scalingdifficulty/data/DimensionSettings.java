@@ -29,6 +29,21 @@ public class DimensionSettings {
     @Nullable private final Integer startingHeight;
     @Nullable private final Boolean positiveHeightIncrement;
     @Nullable private final Boolean negativeHeightIncrement;
+    @Nullable private final Boolean allowSpecialZombie;
+    @Nullable private final Integer bigZombieChance;
+    @Nullable private final Float bigZombieSlownessFactor;
+    @Nullable private final Integer bigZombieBonusLifePoints;
+    @Nullable private final Integer bigZombieBonusDamage;
+    @Nullable private final Float bigZombieSize;
+    @Nullable private final Integer speedZombieChance;
+    @Nullable private final Double speedZombieSpeedFactor;
+    @Nullable private final Integer speedZombieMalusLifePoints;
+    @Nullable private final Boolean dynamicBossModification;
+    @Nullable private final Double dynamicBossModificator;
+    @Nullable private final Double bossMaxFactor;
+    @Nullable private final Double bossDistanceFactor;
+    @Nullable private final Double bossTimeFactor;
+    @Nullable private final Double bossDistance;
 
     public DimensionSettings(JsonObject data) {
         this.distanceCoordinatesX = getNullableInt(data, "distanceCoordinatesX");
@@ -51,11 +66,31 @@ public class DimensionSettings {
         this.startingHeight = getNullableInt(data, "startingHeight");
         this.positiveHeightIncrement = getNullableBoolean(data, "positiveHeightIncrement");
         this.negativeHeightIncrement = getNullableBoolean(data, "negativeHeightIncrement");
+        this.allowSpecialZombie = getNullableBoolean(data, "allowSpecialZombie");
+        this.bigZombieChance = getNullableInt(data, "bigZombieChance");
+        this.bigZombieSlownessFactor = getNullableFloat(data, "bigZombieSlownessFactor");
+        this.bigZombieBonusLifePoints = getNullableInt(data, "bigZombieBonusLifePoints");
+        this.bigZombieBonusDamage = getNullableInt(data, "bigZombieBonusDamage");
+        this.bigZombieSize = getNullableFloat(data, "bigZombieSize");
+        this.speedZombieChance = getNullableInt(data, "speedZombieChance");
+        this.speedZombieSpeedFactor = getNullableDouble(data, "speedZombieSpeedFactor");
+        this.speedZombieMalusLifePoints = getNullableInt(data, "speedZombieMalusLifePoints");
+        this.dynamicBossModification = getNullableBoolean(data, "dynamicBossModification");
+        this.dynamicBossModificator = getNullableDouble(data, "dynamicBossModificator");
+        this.bossMaxFactor = getNullableDouble(data, "bossMaxFactor");
+        this.bossDistanceFactor = getNullableDouble(data, "bossDistanceFactor");
+        this.bossTimeFactor = getNullableDouble(data, "bossTimeFactor");
+        this.bossDistance = getNullableDouble(data, "bossDistance");
     }
 
     @Nullable
     private static Integer getNullableInt(JsonObject data, String key) {
         return data.has(key) ? GsonHelper.getAsInt(data, key) : null;
+    }
+
+    @Nullable
+    private static Float getNullableFloat(JsonObject data, String key) {
+        return data.has(key) ? GsonHelper.getAsFloat(data, key) : null;
     }
 
     @Nullable
@@ -111,4 +146,34 @@ public class DimensionSettings {
     public boolean isPositiveHeightIncrement() { return positiveHeightIncrement != null ? positiveHeightIncrement : config().positiveHeightIncrement; }
 
     public boolean isNegativeHeightIncrement() { return negativeHeightIncrement != null ? negativeHeightIncrement : config().negativeHeightIncrement; }
+
+    public boolean isAllowSpecialZombie() { return allowSpecialZombie != null ? allowSpecialZombie : config().allowSpecialZombie; }
+
+    public int getBigZombieChance() { return bigZombieChance != null ? bigZombieChance : config().bigZombieChance; }
+
+    public float getBigZombieSlownessFactor() { return bigZombieSlownessFactor != null ? bigZombieSlownessFactor : config().bigZombieSlownessFactor; }
+
+    public int getBigZombieBonusLifePoints() { return bigZombieBonusLifePoints != null ? bigZombieBonusLifePoints : config().bigZombieBonusLifePoints; }
+
+    public int getBigZombieBonusDamage() { return bigZombieBonusDamage != null ? bigZombieBonusDamage : config().bigZombieBonusDamage; }
+
+    public float getBigZombieSize() { return bigZombieSize != null ? bigZombieSize : config().bigZombieSize; }
+
+    public int getSpeedZombieChance() { return speedZombieChance != null ? speedZombieChance : config().speedZombieChance; }
+
+    public double getSpeedZombieSpeedFactor() { return speedZombieSpeedFactor != null ? speedZombieSpeedFactor : config().speedZombieSpeedFactor; }
+
+    public int getSpeedZombieMalusLifePoints() { return speedZombieMalusLifePoints != null ? speedZombieMalusLifePoints : config().speedZombieMalusLifePoints; }
+
+    public boolean isDynamicBossModification() { return dynamicBossModification != null ? dynamicBossModification : config().dynamicBossModification; }
+
+    public double getDynamicBossModificator() { return dynamicBossModificator != null ? dynamicBossModificator : config().dynamicBossModificator; }
+
+    public double getBossMaxFactor() { return bossMaxFactor != null ? bossMaxFactor : config().bossMaxFactor; }
+
+    public double getBossDistanceFactor() { return bossDistanceFactor != null ? bossDistanceFactor : config().bossDistanceFactor; }
+
+    public double getBossTimeFactor() { return bossTimeFactor != null ? bossTimeFactor : config().bossTimeFactor; }
+
+    public double getBossDistance() { return bossDistance != null ? bossDistance : config().bossDistance; }
 }
