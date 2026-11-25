@@ -164,16 +164,19 @@ public class DebugHudOverlay {
 
         float distElapsed = distance - settings.getStartingDistance();
         double distBonus = 0.0;
-        if (distElapsed > 0 && !(config.excludeDistanceInOtherDimension && level.dimension() != Level.OVERWORLD)) {
+        if (settings.getIncreasingDistance() != 0 && distElapsed > 0 && !(config.excludeDistanceInOtherDimension && level.dimension() != Level.OVERWORLD))
             distBonus = ((double) (int) distElapsed / settings.getIncreasingDistance()) * settings.getDistanceFactor();
-        }
 
         long timeElapsed = worldTime - (settings.getStartingTime() * DifficultyCalculator.TICKS_PER_MINUTE);
-        int timeDivided = timeElapsed > 0 ? (int) (timeElapsed / (settings.getIncreasingTime() * DifficultyCalculator.TICKS_PER_MINUTE)) : 0;
+        int timeDivided = timeElapsed > 0 && settings.getIncreasingTime() != 0
+                ? (int) (timeElapsed / (settings.getIncreasingTime() * DifficultyCalculator.TICKS_PER_MINUTE))
+                : 0;
         if (config.excludeTimeInOtherDimension && level.dimension() != Level.OVERWORLD) timeDivided = 0;
         double timeBonus = timeDivided * settings.getTimeFactor();
 
-        int spawnHeightDivided = (Mth.floor(player.getY()) - settings.getStartingHeight()) / settings.getHeightDistance();
+        int spawnHeightDivided = settings.getHeightDistance() != 0
+                ? (Mth.floor(player.getY()) - settings.getStartingHeight()) / settings.getHeightDistance()
+                : 0;
         if (!settings.isPositiveHeightIncrement() && spawnHeightDivided > 0) spawnHeightDivided = 0;
         if (!settings.isNegativeHeightIncrement() && spawnHeightDivided < 0) spawnHeightDivided = 0;
         if (config.excludeHeightInOtherDimension && level.dimension() != Level.OVERWORLD) spawnHeightDivided = 0;
