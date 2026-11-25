@@ -1,3 +1,9 @@
+# 1.1.1+1.21.1
+## Added:
+- Expanded the variables that the datapack can modify. Check the [README](https://github.com/Herobrot/scalingdifficulty/blob/1.21/README.md#datapacks)
+## Fixed:
+- Crash when using HUD Overlay and having a 0 value in datapack making a division per 0.
+---
 # 1.1.0+1.21.1
 ## Added:
 - Port of the Zone feature from original mod
